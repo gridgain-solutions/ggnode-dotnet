@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "Schwab.Client": {
+      "commandName": "Project",
+      "commandLineArgs": "1 100000"
+    },
+    "Docker": {
+      "commandName": "Docker"
+    }
+  }
+}
