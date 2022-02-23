@@ -33,32 +33,35 @@ using Apache.Ignite.Core.Cache.Configuration;
 
 namespace Schwab.ClientNode
 { 
-    class DataGeneratorAction : IComputeAction
+    class ClientGeneratorAction : IComputeAction
     {
         [InstanceResource]
         private readonly IIgnite _ignite;
 
-        private readonly int _firstKey;
-        private readonly int _keyCount;
-        private readonly string _cacheName;
+        private readonly long _clientFirstKey;
+        private readonly long _clientKeyCount;
+        private readonly string _clientCacheName;
 
-        public DataGeneratorAction(int firstKey, int keyCount, string cacheName)
+        public ClientGeneratorAction(long clientFirstKey, long clientKeyCount, string clientCacheName)
         {
-            _firstKey = firstKey;
-            _keyCount = keyCount;
-            _cacheName = cacheName;
+            _clientFirstKey = clientFirstKey;
+            _clientKeyCount = clientKeyCount;
+            _clientCacheName = clientCacheName;
         }
 
         public void Invoke()
         {
-            using (var streamer = _ignite.GetDataStreamer<int, Client>(_cacheName))
-
-                for (int id = _firstKey; id < _firstKey + _keyCount; id++)
+            using (var streamer = _ignite.GetDataStreamer<ClientKey, Client>(_clientCacheName))
+            {
+                for (long id = _clientFirstKey; id < _clientFirstKey + _clientKeyCount; id++)
                 {
                     var client = new Client(id);
 
-                    streamer.Add(id, client);
+                    streamer.Add(client.ClientId, client);
                 }
+            }
+
+               
         }
     }
 
@@ -104,6 +107,7 @@ namespace Schwab.ClientNode
 
 
             IgniteConfiguration cfg = Utils.GetClientNodeConfiguration();
+            cfg.PeerAssemblyLoadingMode = PeerAssemblyLoadingMode.CurrentAppDomain;
             // cfg.JavaPeerClassLoadingEnabled = true;
             // cfg.ClientMode = true;
 
@@ -114,33 +118,34 @@ namespace Schwab.ClientNode
                  var clientCfg = new CacheConfiguration {
                     Name = "CLIENT_CACHE",
                     CacheMode = CacheMode.Partitioned,
-                    Backups = 0,
-                    QueryEntities = new[]
+                    Backups = 0 //,
+                   /* QueryEntities = new[]
                     {
                         new QueryEntity
                         {
-                            KeyType = typeof(int),
+                            KeyType = typeof(ClientKey),
+                            KeyFieldName = "ClientId",
                             ValueType = typeof(Client),
                             Fields = new[]
                             {
-                                new QueryField("Id", typeof(int)),
+                                new QueryField("ClientId", typeof(ClientKey)),
                                 new QueryField("Name", typeof(string)),
                                 new QueryField("Status", typeof(string))
                             },
                             Indexes = new[]
                             {
-                                new QueryIndex("Id"),
+                                new QueryIndex("ClientId"),
                             }
                         }
-                    }
+                    } */
                  };          
 
-                var clientCache = ignite.GetOrCreateCache<int, Client>(clientCfg);
+                var clientCache = ignite.GetOrCreateCache<ClientKey, Client>(clientCfg);
                 Console.WriteLine(String.Format(">>> Cache Name: {0} ...", clientCache.Name));
 
-                int keyCount = 80; // 1_000_000_000;
+                long keyCount = 80; // 1_000_000_000;
 
-                var nodeCount = ignite.GetCluster().GetNodes().Count;
+                var nodeCount = 8; //  ignite.GetCluster().GetNodes().Count - 1;
                 var nodeProcessorCount = 8; // CPU count on server nodes.
                 var jobCount = nodeCount * nodeProcessorCount;
                 var batchCount = keyCount / jobCount + 1;
@@ -163,7 +168,7 @@ namespace Schwab.ClientNode
                         break;
                     }
 
-                    actions.Add(new DataGeneratorAction(firstKey, lastKey - firstKey, clientCache.Name));
+                    actions.Add(new ClientGeneratorAction(firstKey, lastKey - firstKey, clientCache.Name));
                 }
 
                 ignite.GetCompute().Run(actions);
@@ -174,7 +179,7 @@ namespace Schwab.ClientNode
                 Console.WriteLine(res.Count);
 
 
-                using (var cursor = clientCache.Query(new ScanQuery<int, Client>()))
+                using (var cursor = clientCache.Query(new ScanQuery<ClientKey, Client>()))
                 {
                     foreach (var entry in cursor)
                     {

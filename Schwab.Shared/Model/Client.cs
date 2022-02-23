@@ -7,21 +7,31 @@
     using Apache.Ignite.Core.Cache.Affinity;
     using Apache.Ignite.Core.Cache.Configuration;
 
+    public class ClientKey
+    {
+        public ClientKey(long id)
+        {
+            this.Id = id;
+        }
+
+        public long Id { get; set; }
+    }
+
 
     /// <summary>
     /// Employee.
     /// </summary>
     public class Client
     {
-        public Client(int id)
+        public Client(long id)
         {
-            this.Id = id;
+            this.ClientId = new ClientKey(id);
             this.Name = String.Format("C{0}", id.ToString().PadLeft(7, '0'));
             this.Status = "New";
         }
 
         [QuerySqlField(IsIndexed = true)]
-        public int Id { get; set; }
+        public ClientKey ClientId { get; set; }
 
 
         [QuerySqlField]
@@ -34,7 +44,7 @@
 
         public override string ToString()
         {
-            return string.Format("{0} [Id={1}, Name={2}, Status={3}]", typeof(Client).Name, Id, Name, Status);
+            return string.Format("{0} [Id={1}, Name={2}, Status={3}]", typeof(Client).Name, ClientId.Id, Name, Status);
         }
 
         private static string CollectionToString<T>(ICollection<T> col)
