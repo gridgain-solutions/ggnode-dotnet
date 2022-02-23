@@ -31,24 +31,28 @@ namespace Schwab.Shared
     using Schwab.Shared.Model;
     using System.IO;
 
+    using GridGain.Core;
+    using GridGain.Core.Security;
+    using Apache.Ignite.Core.Plugin;
+
     /// <summary>
     /// Common configuration and sample data.
     /// </summary>
     public static class Utils
     {
-        public static string GG_CONFIGS_PATH = Environment.GetEnvironmentVariable("SCHWAB_DEMO_GG_CONFIGS_PATH");
-        public static string SchwabDemoJvmClassPath = Environment.GetEnvironmentVariable("SCHWAB_DEMO_GG_JVMCLASSPATH");
-        public static string SchwabDemoSpringConfigUrl = Path.Combine(GG_CONFIGS_PATH, "config", "server-config.xml");
+        //public static string GG_CONFIGS_PATH = Environment.GetEnvironmentVariable("SCHWAB_DEMO_GG_CONFIGS_PATH");
+        //public static string SchwabDemoJvmClassPath = Environment.GetEnvironmentVariable("SCHWAB_DEMO_GG_JVMCLASSPATH");
+        //public static string SchwabDemoSpringConfigUrl = Path.Combine(GG_CONFIGS_PATH, "config", "server-config.xml");
 
         // Currently not used or redundant
         // public static string SchwabDemoOptionalPath = Path.Combine(GG_CONFIGS_PATH, "optional");  // path to optional libs such as control-center-agent 
         // public static string SchwabDemoUserlibsPath = Path.Combine(GG_CONFIGS_PATH, "userlibs");  // path to folder containing the same jar files referenced in SchwabDemoJvmClassPath
 
         // Hard-wired setttings (that were used before converting to enviroment variables above)
-        // public static string SchwabDemoSpringConfigUrl = "gg/config/server-config.xml";
-        // public static string SchwabDemoOptionalPath = "gg/optional";
-        // public static string SchwabDemoUserlibsPath = "gg/userlibs";
-        // public static string SchwabDemoJvmClassPath = "gg/userlibs/model-1.0.jar;gg/userlibs/application-1.0.jar";
+        public static string SchwabDemoSpringConfigUrl = "C:\\clients\\Schwab\\demo\\gg\\config\\server-config.xml";
+        //public static string SchwabDemoOptionalPath = "gg/optional";
+        //public static string SchwabDemoUserlibsPath = "gg/userlibs";
+        public static string SchwabDemoJvmClassPath = null; // "C:\\clients\\Schwab\\demo\\gg\\userlibs\\model-1.0.jar;C:\\clients\\Schwab\\demo\\gg\\userlibs\\application-1.0.jar";
 
         /// <summary>
         /// Initializes the <see cref="Utils"/> class.
@@ -67,17 +71,17 @@ namespace Schwab.Shared
             // None of the options below are mandatory for the examples to work.
             // * Discovery and localhost settings improve startup time
             // * Logging options reduce console output
+            //Localhost = "127.0.0.1",
+            //DiscoverySpi = new TcpDiscoverySpi
+            //{
+            //    IpFinder = new TcpDiscoveryStaticIpFinder
+            //    {
+            //        Endpoints = new[] { "127.0.0.1:47500..47505" }
+            //    },
+            //    SocketTimeout = TimeSpan.FromSeconds(0.3)
+            //},
             return new IgniteConfiguration
             {
-                Localhost = "127.0.0.1",
-                DiscoverySpi = new TcpDiscoverySpi
-                {
-                    IpFinder = new TcpDiscoveryStaticIpFinder
-                    {
-                        Endpoints = new[] { "127.0.0.1:47500..47505" }
-                    },
-                    SocketTimeout = TimeSpan.FromSeconds(0.3)
-                },
                 JvmOptions = new[]
                 {
                     "-DIGNITE_QUIET=true",
@@ -88,12 +92,38 @@ namespace Schwab.Shared
                     MinLevel = LogLevel.Error
                 },
                 PeerAssemblyLoadingMode = PeerAssemblyLoadingMode.CurrentAppDomain,
-                JavaPeerClassLoadingEnabled = true,
+                JavaPeerClassLoadingEnabled = false,
                 SpringConfigUrl = SchwabDemoSpringConfigUrl,
-                JvmClasspath = SchwabDemoJvmClassPath,
-                BinaryConfiguration = new BinaryConfiguration(typeof(FuncSumBalancesForClient))
+                JvmClasspath = SchwabDemoJvmClassPath
+                // BinaryConfiguration = new BinaryConfiguration(typeof(FuncSumBalancesForClient))
             };
         }
+
+        public static IgniteConfiguration clientCfg = new IgniteConfiguration
+        {
+            PeerAssemblyLoadingMode = PeerAssemblyLoadingMode.CurrentAppDomain,
+            SpringConfigUrl = SchwabDemoSpringConfigUrl,
+            JvmClasspath = SchwabDemoJvmClassPath,
+            ClientMode = true,
+
+            PluginConfigurations = new IPluginConfiguration[]
+                {
+                    new GridGainPluginConfiguration
+                    {
+                        SecurityCredentialsProvider = new SecurityCredentialsBasicProvider
+                        {
+                            Credentials = clientCredentials
+                        },
+                        RollingUpdatesEnabled = true,
+                    },
+                },
+        };
+
+        public static SecurityCredentials clientCredentials = new SecurityCredentials
+        {
+            Login = "sdemo",
+            Password = "my1testkey"
+        };
 
         /// <summary>
         /// Gets the thick client node configuration.
@@ -103,7 +133,18 @@ namespace Schwab.Shared
             return new IgniteConfiguration(GetServerNodeConfiguration())
             {
                 ClientMode = true,
-                BinaryConfiguration = new BinaryConfiguration(typeof(FuncSumBalancesForClient))
+                // BinaryConfiguration = new BinaryConfiguration(typeof(FuncSumBalancesForClient)),
+                PluginConfigurations = new IPluginConfiguration[]
+                {
+                    new GridGainPluginConfiguration
+                    {
+                        SecurityCredentialsProvider = new SecurityCredentialsBasicProvider
+                        {
+                            Credentials = clientCredentials
+                        },
+                        RollingUpdatesEnabled = true,
+                    },
+                }
             };
         }
 

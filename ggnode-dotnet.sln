@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31912.275
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Schwab.Shared", "Schwab.Shared\Schwab.Shared.csproj", "{04FF38B7-C44F-44C5-9295-073429723A2D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Schwab.Shared", "Schwab.Shared\Schwab.Shared.csproj", "{59D5F0B7-FF0C-4C88-95E7-DDC1C97199DE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Schwab.Server", "Schwab.Server\Schwab.Server.csproj", "{A0F2FEF8-A0BE-4E83-843C-5E05B95AE9A8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Schwab.Server", "Schwab.Server\Schwab.Server.csproj", "{4E0D90C7-96F7-4409-AA09-D2DA2568D4C6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Schwab.Client", "Schwab.Client\Schwab.Client.csproj", "{7F803BCF-C165-4A99-81CF-86A0D5F03D53}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Schwab.ClientNode", "Schwab.ClientNode\Schwab.ClientNode.csproj", "{B46272CF-E655-49C3-A57B-3FA0D3325084}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,23 +15,23 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{04FF38B7-C44F-44C5-9295-073429723A2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{04FF38B7-C44F-44C5-9295-073429723A2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{04FF38B7-C44F-44C5-9295-073429723A2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{04FF38B7-C44F-44C5-9295-073429723A2D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A0F2FEF8-A0BE-4E83-843C-5E05B95AE9A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A0F2FEF8-A0BE-4E83-843C-5E05B95AE9A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A0F2FEF8-A0BE-4E83-843C-5E05B95AE9A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A0F2FEF8-A0BE-4E83-843C-5E05B95AE9A8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7F803BCF-C165-4A99-81CF-86A0D5F03D53}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7F803BCF-C165-4A99-81CF-86A0D5F03D53}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7F803BCF-C165-4A99-81CF-86A0D5F03D53}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7F803BCF-C165-4A99-81CF-86A0D5F03D53}.Release|Any CPU.Build.0 = Release|Any CPU
+		{59D5F0B7-FF0C-4C88-95E7-DDC1C97199DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{59D5F0B7-FF0C-4C88-95E7-DDC1C97199DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{59D5F0B7-FF0C-4C88-95E7-DDC1C97199DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{59D5F0B7-FF0C-4C88-95E7-DDC1C97199DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E0D90C7-96F7-4409-AA09-D2DA2568D4C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E0D90C7-96F7-4409-AA09-D2DA2568D4C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E0D90C7-96F7-4409-AA09-D2DA2568D4C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E0D90C7-96F7-4409-AA09-D2DA2568D4C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B46272CF-E655-49C3-A57B-3FA0D3325084}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B46272CF-E655-49C3-A57B-3FA0D3325084}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B46272CF-E655-49C3-A57B-3FA0D3325084}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B46272CF-E655-49C3-A57B-3FA0D3325084}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {2F585B47-63B5-48C3-BB5A-A7F868E30C25}
+		SolutionGuid = {E3E9C051-14F2-47C8-8BD4-7488C0723F93}
 	EndGlobalSection
 EndGlobal

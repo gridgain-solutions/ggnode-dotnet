@@ -1,14 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="GridGain.Ignite" Version="8.8.10" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Remove="C:\Users\david.neubert\.nuget\packages\gridgain.ignite\8.8.10\build\output\config\server-config.xml" />
   </ItemGroup>
 
@@ -22,6 +18,10 @@
 
   <ItemGroup>
     <None Remove="C:\Users\david.neubert\.nuget\packages\gridgain.ignite\8.8.10\build\output\config\client-config.xml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="GridGain" Version="8.8.14" />
   </ItemGroup>
 
 </Project>

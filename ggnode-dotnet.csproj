@@ -4,10 +4,17 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <RootNamespace>ggnode-dotnet</RootNamespace>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerfileContext>..\ggnode-dontnet</DockerfileContext>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="GridGain.Ignite" Version="8.8.10" />
+    <PackageReference Include="GridGain" Version="8.8.14" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.14.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Schwab.Shared\Schwab.Shared.csproj" />
   </ItemGroup>
 
 </Project>
