@@ -13,7 +13,7 @@
     /// </summary>
     public class Client
     {
-        public Client(long id)
+        public Client(int id)
         {
             this.Id = id;
             this.Name = String.Format("C{0}", id.ToString().PadLeft(7, '0'));
@@ -21,7 +21,7 @@
         }
 
         [QuerySqlField(IsIndexed = true)]
-        public long Id { get; set; }
+        public int Id { get; set; }
 
 
         [QuerySqlField]

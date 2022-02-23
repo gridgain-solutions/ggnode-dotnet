@@ -38,11 +38,11 @@ namespace Schwab.ClientNode
         [InstanceResource]
         private readonly IIgnite _ignite;
 
-        private readonly long _firstKey;
-        private readonly long _keyCount;
+        private readonly int _firstKey;
+        private readonly int _keyCount;
         private readonly string _cacheName;
 
-        public DataGeneratorAction(long firstKey, long keyCount, string cacheName)
+        public DataGeneratorAction(int firstKey, int keyCount, string cacheName)
         {
             _firstKey = firstKey;
             _keyCount = keyCount;
@@ -51,9 +51,9 @@ namespace Schwab.ClientNode
 
         public void Invoke()
         {
-            using (var streamer = _ignite.GetDataStreamer<long, Client>(_cacheName))
+            using (var streamer = _ignite.GetDataStreamer<int, Client>(_cacheName))
 
-                for (long id = _firstKey; id < _firstKey + _keyCount; id++)
+                for (int id = _firstKey; id < _firstKey + _keyCount; id++)
                 {
                     var client = new Client(id);
 
@@ -119,11 +119,11 @@ namespace Schwab.ClientNode
                     {
                         new QueryEntity
                         {
-                            KeyType = typeof(long),
+                            KeyType = typeof(int),
                             ValueType = typeof(Client),
                             Fields = new[]
                             {
-                                new QueryField("Id", typeof(long)),
+                                new QueryField("Id", typeof(int)),
                                 new QueryField("Name", typeof(string)),
                                 new QueryField("Status", typeof(string))
                             },
@@ -135,10 +135,10 @@ namespace Schwab.ClientNode
                     }
                  };          
 
-                var clientCache = ignite.GetOrCreateCache<long, Client>(clientCfg);
+                var clientCache = ignite.GetOrCreateCache<int, Client>(clientCfg);
                 Console.WriteLine(String.Format(">>> Cache Name: {0} ...", clientCache.Name));
 
-                long keyCount = 80; // 1_000_000_000;
+                int keyCount = 80; // 1_000_000_000;
 
                 var nodeCount = ignite.GetCluster().GetNodes().Count;
                 var nodeProcessorCount = 8; // CPU count on server nodes.
@@ -174,7 +174,7 @@ namespace Schwab.ClientNode
                 Console.WriteLine(res.Count);
 
 
-                using (var cursor = clientCache.Query(new ScanQuery<long, Client>()))
+                using (var cursor = clientCache.Query(new ScanQuery<int, Client>()))
                 {
                     foreach (var entry in cursor)
                     {
