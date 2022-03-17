@@ -7,20 +7,11 @@
     using Apache.Ignite.Core.Cache.Affinity;
     using Apache.Ignite.Core.Cache.Configuration;
 
-    public class ClientKey
-    {
-        public ClientKey(long id)
-        {
-            this.Id = id;
-        }
+    //public class ClientKey
+    //{
+    //    public long Id { get; set; }
+    //}
 
-        public long Id { get; set; }
-    }
-
-
-    /// <summary>
-    /// Employee.
-    /// </summary>
     public class Client
     {
         public static string SQL_SCHEMA = "SDEMO";
@@ -36,38 +27,28 @@
                 Backups = 0,
                 QueryEntities = new[] {
                     new QueryEntity {
-                        KeyType = typeof(ClientKey),
-                        KeyFieldName = "ClientId",
+                        KeyType = typeof(long),
                         ValueType = typeof(Client),
+                        KeyFieldName = "Id",
                         Fields = new[] {
-                            new QueryField("ClientId", typeof(ClientKey)),
-                            new QueryField("Name", typeof(string)),
-                            new QueryField("Status", typeof(string))
+                                new QueryField("Id", typeof(long)),
+                                new QueryField("Name", typeof(string)),
+                                new QueryField("Status", typeof(string))
                         }
                     }
                 }
             };
         }
 
-        public Client(long id)
-        {
-            this.ClientId = new ClientKey(id);
-            this.Name = String.Format("C{0}", id.ToString().PadLeft(7, '0'));
-            this.Status = "New";
-        }
-
-        [QuerySqlField(IsIndexed = true)]
-        public ClientKey ClientId {  get; set; }
-
-        [QuerySqlField]
+        // [QuerySqlField]  QueryEntities (above) used instead of annotations to add cache key field ("Id") as a queryable SQL Field
         public string Name { get; set; }
 
-        [QuerySqlField]
+        // [QuerySqlField]  QueryEntities (above) used instead of annotations to add cache key field ("Id") as a queryable SQL Field
         public string Status { get; set; }
 
         public override string ToString()
         {
-            return string.Format("{0} [Id={1}, Name={2}, Status={3}", typeof(Client).Name, ClientId.Id, Name, Status);
+            return string.Format("{0} [Name={1}, Status={2}]", typeof(Client).Name, Name, Status);
         }
 
         private static string CollectionToString<T>(ICollection<T> col)

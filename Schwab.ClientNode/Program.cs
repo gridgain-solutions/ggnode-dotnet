@@ -47,12 +47,14 @@ namespace Schwab.ClientNode
 
         public void Invoke()
         {
-            using (var streamer = _ignite.GetDataStreamer<ClientKey, Client>(_clientCacheName))
+            using (var streamer = _ignite.GetDataStreamer<long, Client>(_clientCacheName))
             {
                 for (long id = _clientFirstKey; id < _clientFirstKey + _clientKeyCount; id++)
                 {
-                    var client = new Client(id);
-                    streamer.Add(client.ClientId, client);
+                    // var clientKey = new ClientKey { Id = id };
+                    var client = new Client { Name = String.Format("C{0}", id.ToString().PadLeft(7, '0')), Status = "New" };
+
+                    streamer.Add(id, client);
 
                 }
             }
@@ -87,7 +89,8 @@ namespace Schwab.ClientNode
                     long maxId = minId + _numAccountsPerClient;
                     for (long accountId = minId; accountId < maxId; accountId++)
                     {
-                        var accountKey = new AccountKey { Id = accountId, ClientId = new ClientKey(clientid) };
+                        // var clientKey = new ClientKey { Id = clientid };
+                        var accountKey = new AccountKey { Id = accountId, ClientId = clientid };
                         var account = new Account(accountId, clientid);
 
                         streamer.Add(accountKey, account);
@@ -152,12 +155,12 @@ namespace Schwab.ClientNode
             return actions;
         }
 
-        static void TestClientsUsing(ICache<ClientKey, Client> cache, long numClients)
+        static void TestClientsUsing(ICache<long, Client> cache, long numClients)
         {
             IList<IList<object>> res = cache.Query(new SqlFieldsQuery("SELECT * FROM Client")).GetAll();
             Console.WriteLine("SELECT * FROM Client result count: " + res.Count);
 
-            using (var cursor = cache.Query(new ScanQuery<ClientKey, Client>()))
+            using (var cursor = cache.Query(new ScanQuery<long, Client>()))
             {
                 int i = 0;
 
@@ -247,7 +250,7 @@ namespace Schwab.ClientNode
 
                 // Get or create client cache
                 var clientCfg = Client.CacheCfg();
-                var clientCache = ignite.GetOrCreateCache<ClientKey, Client>(clientCfg);
+                var clientCache = ignite.GetOrCreateCache<long, Client>(clientCfg);
 
                 // Get or create account cache
                 var accountCfg = Account.CacheCfg();
