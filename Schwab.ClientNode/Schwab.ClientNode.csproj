@@ -3,7 +3,8 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+	<Deterministic>false</Deterministic>
+	<AssemblyVersion>1.0.0.6</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>

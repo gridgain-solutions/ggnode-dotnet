@@ -27,12 +27,8 @@ using Apache.Ignite.Core.Cache.Query;
 using Apache.Ignite.Core.Cache.Configuration;
 
 
-// using Schwab.Shared;
-//using Schwab.Shared;
-// using Schwab.Shared.Model;
-
 namespace Schwab.ClientNode
-{ 
+{
     class ClientGeneratorAction : IComputeAction
     {
         [InstanceResource]
@@ -56,22 +52,145 @@ namespace Schwab.ClientNode
                 for (long id = _clientFirstKey; id < _clientFirstKey + _clientKeyCount; id++)
                 {
                     var client = new Client(id);
-
                     streamer.Add(client.ClientId, client);
+
                 }
             }
-
-               
         }
     }
 
+    class AccountGeneratorAction : IComputeAction
+    {
+        [InstanceResource]
+        private readonly IIgnite _ignite;
+
+        private readonly long _clientFirstKey;
+        private readonly long _clientKeyCount;
+        private readonly string _accountCacheName;
+        private readonly long _numAccountsPerClient;
+
+        public AccountGeneratorAction(long clientFirstKey, long clientKeyCount, string accountCacheName, long numAccountsPerClient)
+        {
+            _clientFirstKey = clientFirstKey;
+            _clientKeyCount = clientKeyCount;
+            _accountCacheName = accountCacheName;
+            _numAccountsPerClient = numAccountsPerClient;
+        }
+
+        public void Invoke()
+        {
+            using (var streamer = _ignite.GetDataStreamer<AccountKey, Account>(_accountCacheName))
+            {
+                for (long clientid = _clientFirstKey; clientid < _clientFirstKey + _clientKeyCount; clientid++)
+                {
+                    long minId = clientid * _numAccountsPerClient;
+                    long maxId = minId + _numAccountsPerClient;
+                    for (long accountId = minId; accountId < maxId; accountId++)
+                    {
+                        var accountKey = new AccountKey { Id = accountId, ClientId = new ClientKey(clientid) };
+                        var account = new Account(accountId, clientid);
+
+                        streamer.Add(accountKey, account);
+                    }
+                }
+            }
+        }
+    }
 
     class Program
     {
 
-        /*
-        private static String SDemoSpringConfigUrl = "C:\\clients\\Schwab\\demo\\Schwab.Client\\Schwab.Client\\Properties\\spring.xml";
+        static List<IComputeAction> BuildClientActionsUsing(long numClients, string cacheName, long batchCount, long batchSize)
+        { 
+            var actions = new List<IComputeAction>();
+            var lastBatch = batchCount - 1;
 
+            for (long batch = 0; batch < batchCount; batch++)
+            {
+                var firstKey = batch * batchSize;
+                var lastKey = firstKey + batchSize;
+
+                if (lastKey > numClients || batch == lastBatch)
+                {
+                    lastKey = numClients;
+                }
+
+                if (lastKey <= firstKey)
+                {
+                    break;
+                }
+
+                actions.Add(new ClientGeneratorAction(firstKey, lastKey - firstKey, cacheName));
+            }
+
+            return actions;
+        }
+
+        static List<IComputeAction> BuildAccountActions(long numClients, string cacheName, long numAccountsPerClient, long batchCount, long batchSize)
+        {
+            var actions = new List<IComputeAction>();
+            var lastBatch = batchCount - 1;
+
+            for (int batch = 0; batch < batchCount; batch++)
+            {
+                var firstKey = batch * batchSize;
+                var lastKey = firstKey + batchSize;
+
+                if (lastKey > numClients || batch == lastBatch)
+                {
+                    lastKey = numClients;
+                }
+
+                if (lastKey <= firstKey)
+                {
+                    break;
+                }
+
+                actions.Add(new AccountGeneratorAction(firstKey, lastKey - firstKey, cacheName, numAccountsPerClient));
+            }
+
+            return actions;
+        }
+
+        static void TestClientsUsing(ICache<ClientKey, Client> cache, long numClients)
+        {
+            IList<IList<object>> res = cache.Query(new SqlFieldsQuery("SELECT * FROM Client")).GetAll();
+            Console.WriteLine("SELECT * FROM Client result count: " + res.Count);
+
+            using (var cursor = cache.Query(new ScanQuery<ClientKey, Client>()))
+            {
+                int i = 0;
+
+                foreach (var entry in cursor)
+                {
+                    i = i + 1;
+                    if (i == 1 || i % 1000 == 0 || i > numClients - 100)
+                        Console.WriteLine("I= " + i + ", Key = " + entry.Key + ", Value = " + entry.Value);
+                }
+            }
+        }
+
+        static void TestAccountsUsing(ICache<long, Account> cache, long numClients, long numAccountsPerClient)
+        {
+            IList<IList<object>> res = cache.Query(new SqlFieldsQuery("SELECT * FROM Account")).GetAll();
+            Console.WriteLine("SELECT * FROM Account result count: " + res.Count);
+
+            /*
+            using (var cursor = cache.Query(new ScanQuery<long, Account>()))
+            {
+                int i = 0;
+
+                foreach (var entry in cursor)
+                {
+                    i = i + 1;
+                    if (i == 1 || i % 1000 == 0 || i > numClients - 100)
+                        Console.WriteLine("I= " + i + ", Key = " + entry.Key + ", Value = " + entry.Value);
+                }
+            }
+            */
+        }
+
+        /*
 
         class BuildBinaryClient : IComputeFunc<KeyValuePair<IIgnite, int>, IBinaryObject>
         {
@@ -92,100 +211,86 @@ namespace Schwab.ClientNode
 
         static void Main(string[] args)
         {
-            const int defaultClientId = 1;
-            const decimal defaultAggrBalanceLimit = 100000M;
+            // Default program argument values
+            const long DEFAULT_NUM_CLIENTS = 1_000_000;
+            const long DEFAULT_NUM_ACCOUNTS_PER_CLIENT = 10; // 10_000;
+            const int DEFAULT_CLIENT_ID = 1;
+            const decimal DEFAULT_AGGR_BALANCE_LIMIT = 100000M;
+            const int DEFAULT_NUM_PROCESSORS_PER_DATA_NODE = 8;
 
-            // Program parameters
+            // Run time program argument values
+            long numClients;
+            long numAccountsPerClient;
             int clientId;
             decimal aggrBalanceLimit;
+            int numProcessorsPerDataNode;
 
-            // Initialize program parameter using default values or program arguments 
-            if (args.Length == 0 || !int.TryParse(args[0], out clientId))
-                clientId = defaultClientId;
-            if (args.Length < 2 || !Decimal.TryParse(args[1], NumberStyles.Any, CultureInfo.InvariantCulture, out aggrBalanceLimit))
-                aggrBalanceLimit = defaultAggrBalanceLimit;
+            // Initialize program parameter using either default values or program arguments 
+            if (args.Length == 0 || !long.TryParse(args[0], out numClients))
+                numClients = DEFAULT_NUM_CLIENTS;
+            if (args.Length < 2 || !long.TryParse(args[0], out numAccountsPerClient))
+                numAccountsPerClient = DEFAULT_NUM_ACCOUNTS_PER_CLIENT;
+            if (args.Length < 3 || !int.TryParse(args[0], out clientId))
+                clientId = DEFAULT_CLIENT_ID;
+            if (args.Length < 4 || !Decimal.TryParse(args[1], NumberStyles.Any, CultureInfo.InvariantCulture, out aggrBalanceLimit))
+                aggrBalanceLimit = DEFAULT_AGGR_BALANCE_LIMIT;
+            if (args.Length < 5 || !int.TryParse(args[0], out numProcessorsPerDataNode))
+                numProcessorsPerDataNode = DEFAULT_NUM_PROCESSORS_PER_DATA_NODE;
 
 
             IgniteConfiguration cfg = Utils.GetClientNodeConfiguration();
-            cfg.PeerAssemblyLoadingMode = PeerAssemblyLoadingMode.CurrentAppDomain;
-            // cfg.JavaPeerClassLoadingEnabled = true;
-            // cfg.ClientMode = true;
-
             using (IIgnite ignite = Ignition.Start(cfg))
             {
-                 ignite.DestroyCache("CLIENT_CACHE");
+                // Destroy previous caches -- start from scratch every time
+                ignite.DestroyCache(Client.CACHE_NAME);
+                ignite.DestroyCache(Account.CACHE_NAME);
 
-                 var clientCfg = new CacheConfiguration {
-                    Name = "CLIENT_CACHE",
-                    CacheMode = CacheMode.Partitioned,
-                    Backups = 0 //,
-                   /* QueryEntities = new[]
-                    {
-                        new QueryEntity
-                        {
-                            KeyType = typeof(ClientKey),
-                            KeyFieldName = "ClientId",
-                            ValueType = typeof(Client),
-                            Fields = new[]
-                            {
-                                new QueryField("ClientId", typeof(ClientKey)),
-                                new QueryField("Name", typeof(string)),
-                                new QueryField("Status", typeof(string))
-                            },
-                            Indexes = new[]
-                            {
-                                new QueryIndex("ClientId"),
-                            }
-                        }
-                    } */
-                 };          
-
+                // Get or create client cache
+                var clientCfg = Client.CacheCfg();
                 var clientCache = ignite.GetOrCreateCache<ClientKey, Client>(clientCfg);
-                Console.WriteLine(String.Format(">>> Cache Name: {0} ...", clientCache.Name));
 
-                long keyCount = 80; // 1_000_000_000;
+                // Get or create account cache
+                var accountCfg = Account.CacheCfg();
+                var accountCache = ignite.GetOrCreateCache<long, Account>(accountCfg);
 
-                var nodeCount = 8; //  ignite.GetCluster().GetNodes().Count - 1;
-                var nodeProcessorCount = 8; // CPU count on server nodes.
-                var jobCount = nodeCount * nodeProcessorCount;
-                var batchCount = keyCount / jobCount + 1;
-                var batchSize = keyCount / batchCount;
+                // Calculate jobCount - the max number of concurrent jobs (based upon the total number of processors in the data nodes)
+                var nodeCount = ignite.GetCluster().GetNodes().Count - 1;
+                var jobCount = nodeCount * numProcessorsPerDataNode;
 
-                var actions = new List<IComputeAction>();
-
-                for (int batch = 0; batch < batchCount; batch++)
-                {
-                    var firstKey = batch * batchSize;
-                    var lastKey = firstKey + batchSize;
-
-                    if (lastKey > keyCount)
-                    {
-                        lastKey = keyCount;
-                    }
-
-                    if (lastKey <= firstKey)
-                    {
-                        break;
-                    }
-
-                    actions.Add(new ClientGeneratorAction(firstKey, lastKey - firstKey, clientCache.Name));
-                }
-
-                ignite.GetCompute().Run(actions);
-
-                // var cursor = clientCache.Query(new ScanQuery<long, Client>());
-
-                IList<IList<object>> res = clientCache.Query(new SqlFieldsQuery("SELECT * FROM Client")).GetAll();
-                Console.WriteLine(res.Count);
+                // Calculate batchCount and batchSize - the number and size of batches needed to distribute and populate clients in the compute grid.
+                var batchCount = numClients / jobCount + 1;
+                var batchSize = numClients / batchCount;
 
 
-                using (var cursor = clientCache.Query(new ScanQuery<ClientKey, Client>()))
-                {
-                    foreach (var entry in cursor)
-                    {
-                        Console.WriteLine("Key = " + entry.Key + ", Value = " + entry.Value);
-                    }
-                }
+
+                // ***********   Populate Client records using the compute grid  ******************************
+
+                Console.WriteLine("Begin Clients Compute using cache {0}: {1}", clientCache.Name, DateTime.Now.ToString("h:mm:ss tt"));
+
+                var actions = BuildClientActionsUsing(numClients, clientCache.Name, batchCount, batchSize);
+                ignite.GetCluster().ForDataNodes(clientCache.Name).GetCompute().Run(actions);
+
+                Console.WriteLine("End Clients Compute using cache {0}: {1}", clientCache.Name, DateTime.Now.ToString("h:mm:ss tt"));
+
+                TestClientsUsing(clientCache, numClients);
+
+                Console.WriteLine("End Test Clients using cache {0}: {1}", clientCache.Name, DateTime.Now.ToString("h:mm:ss tt"));
+
+
+
+                // ***********   Populate Account records using the compute grid  ******************************
+
+                actions = BuildAccountActions(numClients, accountCache.Name, numAccountsPerClient, batchCount, batchSize);
+
+                Console.WriteLine("Begin Accounts Compute using cache {0}: {1}", accountCache.Name, DateTime.Now.ToString("h:mm:ss tt"));
+
+                ignite.GetCluster().ForDataNodes(accountCache.Name).GetCompute().Run(actions);
+
+                Console.WriteLine("End Accounts Compute using cache {0}: {1}", accountCache.Name, DateTime.Now.ToString("h:mm:ss tt"));
+
+                TestAccountsUsing(accountCache, numClients, numAccountsPerClient);
+
+                Console.WriteLine("End Test Accounts using cache {0}: {1}", accountCache.Name, DateTime.Now.ToString("h:mm:ss tt"));
 
                 Console.WriteLine();
                 Console.WriteLine(">>> CLIENT_CACHE load finished, press any key to exit ...");

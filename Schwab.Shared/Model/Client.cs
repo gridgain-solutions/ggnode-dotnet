@@ -23,6 +23,32 @@
     /// </summary>
     public class Client
     {
+        public static string SQL_SCHEMA = "SDEMO";
+        public static string CACHE_NAME = "CLIENT_CACHE";
+        
+        public static CacheConfiguration CacheCfg() {
+
+            return new CacheConfiguration
+            {
+                SqlSchema = SQL_SCHEMA,
+                Name = CACHE_NAME,
+                CacheMode = CacheMode.Partitioned,
+                Backups = 0,
+                QueryEntities = new[] {
+                    new QueryEntity {
+                        KeyType = typeof(ClientKey),
+                        KeyFieldName = "ClientId",
+                        ValueType = typeof(Client),
+                        Fields = new[] {
+                            new QueryField("ClientId", typeof(ClientKey)),
+                            new QueryField("Name", typeof(string)),
+                            new QueryField("Status", typeof(string))
+                        }
+                    }
+                }
+            };
+        }
+
         public Client(long id)
         {
             this.ClientId = new ClientKey(id);
@@ -31,20 +57,17 @@
         }
 
         [QuerySqlField(IsIndexed = true)]
-        public ClientKey ClientId { get; set; }
-
+        public ClientKey ClientId {  get; set; }
 
         [QuerySqlField]
         public string Name { get; set; }
 
-
         [QuerySqlField]
         public string Status { get; set; }
 
-
         public override string ToString()
         {
-            return string.Format("{0} [Id={1}, Name={2}, Status={3}]", typeof(Client).Name, ClientId.Id, Name, Status);
+            return string.Format("{0} [Id={1}, Name={2}, Status={3}", typeof(Client).Name, ClientId.Id, Name, Status);
         }
 
         private static string CollectionToString<T>(ICollection<T> col)

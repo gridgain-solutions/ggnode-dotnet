@@ -49,7 +49,8 @@ namespace Schwab.Shared
         // public static string SchwabDemoUserlibsPath = Path.Combine(GG_CONFIGS_PATH, "userlibs");  // path to folder containing the same jar files referenced in SchwabDemoJvmClassPath
 
         // Hard-wired setttings (that were used before converting to enviroment variables above)
-        public static string SchwabDemoSpringConfigUrl = "C:\\clients\\Schwab\\demo\\gg\\config\\server-config.xml";
+        public static string SchwabDemoSpringConfigUrl = "C:\\clients\\Schwab\\demo\\gg\\config\\nebula-server-config.xml";
+        // public static string SchwabDemoSpringConfigUrl = "C:\\clients\\Schwab\\demo\\gg\\config\\local-dotnet-server-config.xml";
         //public static string SchwabDemoOptionalPath = "gg/optional";
         //public static string SchwabDemoUserlibsPath = "gg/userlibs";
         public static string SchwabDemoJvmClassPath = null; // "C:\\clients\\Schwab\\demo\\gg\\userlibs\\model-1.0.jar;C:\\clients\\Schwab\\demo\\gg\\userlibs\\application-1.0.jar";
@@ -92,32 +93,13 @@ namespace Schwab.Shared
                     MinLevel = LogLevel.Error
                 },
                 PeerAssemblyLoadingMode = PeerAssemblyLoadingMode.CurrentAppDomain,
-                JavaPeerClassLoadingEnabled = false,
+                JavaPeerClassLoadingEnabled = true,
                 SpringConfigUrl = SchwabDemoSpringConfigUrl,
                 JvmClasspath = SchwabDemoJvmClassPath
                 // BinaryConfiguration = new BinaryConfiguration(typeof(FuncSumBalancesForClient))
             };
         }
 
-        public static IgniteConfiguration clientCfg = new IgniteConfiguration
-        {
-            PeerAssemblyLoadingMode = PeerAssemblyLoadingMode.CurrentAppDomain,
-            SpringConfigUrl = SchwabDemoSpringConfigUrl,
-            JvmClasspath = SchwabDemoJvmClassPath,
-            ClientMode = true,
-
-            PluginConfigurations = new IPluginConfiguration[]
-                {
-                    new GridGainPluginConfiguration
-                    {
-                        SecurityCredentialsProvider = new SecurityCredentialsBasicProvider
-                        {
-                            Credentials = clientCredentials
-                        },
-                        RollingUpdatesEnabled = true,
-                    },
-                },
-        };
 
         public static SecurityCredentials clientCredentials = new SecurityCredentials
         {
