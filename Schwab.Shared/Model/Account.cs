@@ -8,12 +8,12 @@
     using Apache.Ignite.Core.Cache.Configuration;
 
 
-    public class AccountKey
-    {
-        public long Id { get; set; }
+    //public class AccountKey
+    //{
+    //    public long Id { get; set; }
 
-        [AffinityKeyMapped] public long ClientId { get; set; }
-    }
+    //    [AffinityKeyMapped] public long ClientId { get; set; }
+    //}
 
 
     public class Account
@@ -33,41 +33,12 @@
                 {
                     new QueryEntity
                     {
-                        KeyType = typeof(AccountKey),
+                        KeyType = typeof(AffinityKey),   // typeof(AccountKey)
                         ValueType = typeof(Account),
-                //        Fields = new[] 
-                //        {
-                //            new QueryField("Id", typeof(long)),
-                //            new QueryField("ClientId", typeof(long)),
-                //            new QueryField("Name", typeof(string)),
-                //            new QueryField("Type", typeof(int)),
-                //            new QueryField("Status", typeof(string)),
-                //            new QueryField("Balance", typeof(long)),
-                //            new QueryField("Status", typeof(string))
-                //        }
                     }
-                },
-                //KeyConfiguration = new[]
-                //{
-                //    new CacheKeyConfiguration
-                //    {
-                //        TypeName = nameof(Account),
-                //        AffinityKeyFieldName = nameof(Account.ClientId)
-                //    }
-                //}
+                }
             };
         }
-
-        public Account(long id, long clientId)
-        {
-            this.Id = id;
-            this.ClientId = clientId;
-            this.Name = string.Format("C{0}.A{1}", clientId, id);
-            this.Type = 0;
-            this.Balance = id % 10;
-            this.Status = "NEW";
-        }
-
 
         [QuerySqlField(IsIndexed = true)]
         public long Id { get; set; }
