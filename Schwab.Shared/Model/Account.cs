@@ -8,12 +8,15 @@
     using Apache.Ignite.Core.Cache.Configuration;
 
 
-    //public class AccountKey
-    //{
-    //    public long Id { get; set; }
+    public class AccountKey
+    {
+        [QuerySqlField]
+        public long Id { get; set; }
 
-    //    [AffinityKeyMapped] public long ClientId { get; set; }
-    //}
+        [QuerySqlField]
+        [AffinityKeyMapped]
+        public long ClientId { get; set; }
+    }
 
 
     public class Account
@@ -33,18 +36,12 @@
                 {
                     new QueryEntity
                     {
-                        KeyType = typeof(AffinityKey),   // typeof(AccountKey)
+                        KeyType = typeof(AccountKey),
                         ValueType = typeof(Account),
                     }
                 }
             };
         }
-
-        [QuerySqlField(IsIndexed = true)]
-        public long Id { get; set; }
-
-        [QuerySqlField(IsIndexed = true)]
-        public long ClientId { get; set; }
 
         [QuerySqlField]
         public string Name { get; set; }
@@ -60,8 +57,9 @@
 
         public override string ToString()
         {
-            return String.Format("{0} [Id={1}, ClientId={2}, Name={3}, Type={4}, Balance={5}, Status={6}]", typeof(Account).Name, Id, ClientId, Name, Type, Balance, Status);
+            return String.Format("{0} [Name={1}, Type={2}, Balance={3}, Status={4}]", typeof(Account).Name, Name, Type, Balance, Status);
         }
+
         private static string CollectionToString<T>(ICollection<T> col)
         {
             if (col == null)

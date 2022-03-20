@@ -7,11 +7,6 @@
     using Apache.Ignite.Core.Cache.Affinity;
     using Apache.Ignite.Core.Cache.Configuration;
 
-    //public class ClientKey
-    //{
-    //    public long Id { get; set; }
-    //}
-
     public class Client
     {
         public static string SQL_SCHEMA = "SDEMO";
@@ -31,19 +26,19 @@
                         ValueType = typeof(Client),
                         KeyFieldName = "Id",
                         Fields = new[] {
-                                new QueryField("Id", typeof(long)),
-                                new QueryField("Name", typeof(string)),
-                                new QueryField("Status", typeof(string))
+                            new QueryField("Id", typeof(long)),
+                            new QueryField("Name", typeof(string)),
+                            new QueryField("Status", typeof(string))
                         }
                     }
                 }
             };
         }
 
-        // [QuerySqlField]  QueryEntities (above) used instead of annotations to add cache key field ("Id") as a queryable SQL Field
+        // [QuerySqlField] - Annotation not used so that Key field "Id" (above) can be of type 'long' instead of class ClientKey.
         public string Name { get; set; }
 
-        // [QuerySqlField]  QueryEntities (above) used instead of annotations to add cache key field ("Id") as a queryable SQL Field
+        // [QuerySqlField] - Annotation method not used (for same reason above).
         public string Status { get; set; }
 
         public override string ToString()

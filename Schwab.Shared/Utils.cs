@@ -86,7 +86,14 @@ namespace Schwab.Shared
                 JvmOptions = new[]
                 {
                     "-DIGNITE_QUIET=true",
-                    "-DIGNITE_PERFORMANCE_SUGGESTIONS_DISABLED=true"
+                    "-DIGNITE_PERFORMANCE_SUGGESTIONS_DISABLED=true",
+                    "--add-exports=java.base/jdk.internal.misc=ALL-UNNAMED",
+                    "--add-exports=java.base/sun.nio.ch=ALL-UNNAMED",
+                    "--add-exports=java.management/com.sun.jmx.mbeanserver=ALL-UNNAMED",
+                    "--add-exports=jdk.internal.jvmstat/sun.jvmstat.monitor=ALL-UNNAMED",
+                    "--add-exports=java.base/sun.reflect.generics.reflectiveObjects=ALL-UNNAMED",
+                    "--add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED",
+                    "--illegal-access="
                 },
                 Logger = new ConsoleLogger
                 {
@@ -116,6 +123,7 @@ namespace Schwab.Shared
             {
                 ClientMode = true,
                 // BinaryConfiguration = new BinaryConfiguration(typeof(FuncSumBalancesForClient)),
+                /*
                 PluginConfigurations = new IPluginConfiguration[]
                 {
                     new GridGainPluginConfiguration
@@ -127,6 +135,7 @@ namespace Schwab.Shared
                         RollingUpdatesEnabled = true,
                     },
                 }
+                */
             };
         }
 
