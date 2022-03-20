@@ -222,7 +222,7 @@ namespace Schwab.ClientNode
             const long DEFAULT_NUM_ACCOUNTS_PER_CLIENT = 10; // 10_000;
             const int DEFAULT_CLIENT_ID = 1;
             const decimal DEFAULT_AGGR_BALANCE_LIMIT = 100000M;
-            const int DEFAULT_NUM_PROCESSORS_PER_DATA_NODE = 3; // 8;
+            const int DEFAULT_NUM_PROCESSORS_PER_DATA_NODE = 8;
 
             // Program argument - run time values
             long numClients;
