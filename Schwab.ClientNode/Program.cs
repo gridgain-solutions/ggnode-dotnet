@@ -324,14 +324,15 @@ namespace Schwab.ClientNode
 
                 Console.WriteLine();
                 Console.WriteLine(">>> Find all clients with an aggregate account balance less than: {0:C} {1}", aggrBalanceLimit, DateTime.Now.ToString("h:mm:ss tt"));
-                var hits = (List<AggregateBalance>)ignite.GetCompute().Call(new FuncFindClientsWithAggregateBalanceLessThan(aggrBalanceLimit));
+                
+                var nodeHits = ignite.GetCluster().ForDataNodes(Client.CACHE_NAME).GetCompute()
+                                     .Broadcast<List<AggregateBalance>>(new FuncFindClientsWithAggregateBalanceLessThan(aggrBalanceLimit));
+
+                var hits = nodeHits.SelectMany(list => list).ToList();
                 Console.WriteLine(String.Format("{0} Clients found: {1}", hits.Count, DateTime.Now.ToString("h:mm:ss tt")) );
                 foreach (var hit in hits) Console.WriteLine(hit);
                 Console.WriteLine(String.Format("{0} Clients found: {1}", hits.Count, DateTime.Now.ToString("h:mm:ss tt")));
-
                 Console.WriteLine();
-                Console.WriteLine(">>> Example finished, press any key to exit ...");
-
 
                 // ***********   End ClientNode actions  ******************************
 

@@ -38,9 +38,7 @@ namespace Schwab.Shared
             foreach (var key in keys)
             {
                 int clientId = Convert.ToInt32(key);
-                var aggrBalance = (Decimal)_ignite.GetCompute().ExecuteJavaTask<Decimal>("com.gridgain.ignite.ggnode.cgrid.SumBalancesForClientTaskAffinity", clientId);
-                //if (((Object)aggBalance) == null) TODO fix this hack later (JAVA Task should return null or N/A value, not 0 when no recs found?
-                //    aggBalance = 0M;
+                var aggrBalance = (Decimal)_ignite.GetCluster().ForLocal().GetCompute().ExecuteJavaTask<Decimal>("com.gridgain.ignite.ggnode.cgrid.SumBalancesForClientTaskLocal", clientId);
 
                 if (aggrBalance < Val)
                 {
