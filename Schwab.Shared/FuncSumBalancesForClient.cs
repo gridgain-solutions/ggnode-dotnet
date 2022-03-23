@@ -22,7 +22,7 @@ namespace Schwab.Shared
 
         public Decimal Invoke()
         {
-            Decimal aggrBalance = (Decimal)_ignite.GetCompute().ExecuteJavaTask<Decimal>("com.gridgain.ignite.ggnode.cgrid.SumBalancesForClientComputeTask", clientId);
+            Decimal aggrBalance = (Decimal)_ignite.GetCompute().ExecuteJavaTask<Decimal>("com.gridgain.ignite.ggnode.cgrid.SumBalancesForClientTaskAffinity", clientId);
             _ignite.Logger.Log(LogLevel.Info, string.Format("{0} [id={1}, aggrBalance={2}]", typeof(FuncSumBalancesForClient).Name, clientId, aggrBalance.ToString()));
 
             return aggrBalance;

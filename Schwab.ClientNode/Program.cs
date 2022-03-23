@@ -220,82 +220,117 @@ namespace Schwab.ClientNode
             // Program argument - default values
             const long DEFAULT_NUM_CLIENTS = 1_000_000;
             const long DEFAULT_NUM_ACCOUNTS_PER_CLIENT = 10; // 10_000;
-            const int DEFAULT_CLIENT_ID = 1;
-            const decimal DEFAULT_AGGR_BALANCE_LIMIT = 100000M;
+            const decimal DEFAULT_AGGR_BALANCE_LIMIT = 75000M;
             const int DEFAULT_NUM_PROCESSORS_PER_DATA_NODE = 3;  // 8;
+
+            const int DEFAULT_MIN_TEST_CLIENT_ID = 1;
+            const int DEFAULT_MAX_TEST_CLIENT_ID = 100;
 
             // Program argument - run time values
             long numClients;
             long numAccountsPerClient;
-            int clientId;
             decimal aggrBalanceLimit;
             int numProcessorsPerDataNode;
+
+            int minTestClientId;
+            int maxTestClientId;
 
             // Initialize program argument run time values
             if (args.Length == 0 || !long.TryParse(args[0], out numClients))
                 numClients = DEFAULT_NUM_CLIENTS;
-            if (args.Length < 2 || !long.TryParse(args[0], out numAccountsPerClient))
+            if (args.Length < 2 || !long.TryParse(args[1], out numAccountsPerClient))
                 numAccountsPerClient = DEFAULT_NUM_ACCOUNTS_PER_CLIENT;
-            if (args.Length < 3 || !int.TryParse(args[0], out clientId))
-                clientId = DEFAULT_CLIENT_ID;
-            if (args.Length < 4 || !Decimal.TryParse(args[1], NumberStyles.Any, CultureInfo.InvariantCulture, out aggrBalanceLimit))
+            if (args.Length < 3 || !Decimal.TryParse(args[2], NumberStyles.Any, CultureInfo.InvariantCulture, out aggrBalanceLimit))
                 aggrBalanceLimit = DEFAULT_AGGR_BALANCE_LIMIT;
-            if (args.Length < 5 || !int.TryParse(args[0], out numProcessorsPerDataNode))
+            if (args.Length < 4 || !int.TryParse(args[3], out numProcessorsPerDataNode))
                 numProcessorsPerDataNode = DEFAULT_NUM_PROCESSORS_PER_DATA_NODE;
+            if (args.Length < 5 || !int.TryParse(args[4], out minTestClientId))
+                minTestClientId = DEFAULT_MIN_TEST_CLIENT_ID;
+            if (args.Length < 6 || !int.TryParse(args[5], out maxTestClientId))
+                maxTestClientId = DEFAULT_MAX_TEST_CLIENT_ID;
 
             // Main program implementation
 
             IgniteConfiguration cfg = Utils.GetClientNodeConfiguration();
             using (IIgnite ignite = Ignition.Start(cfg))
             {
-                // Destroy previous caches -- start caches from scratch every time
-                ignite.DestroyCache(Client.CACHE_NAME);
-                ignite.DestroyCache(Account.CACHE_NAME);
+                Console.Write("Initialize and populate caches: Y/N [N]");
+                string ok = Console.ReadLine().Trim().ToLower();
+                bool populateCaches = ok.Length > 0 && ok[0] == 'y';
 
-                // Create Client cache
-                var clientCfg = Client.CacheCfg();
-                var clientCache = ignite.GetOrCreateCache<long, Client>(clientCfg);
+                if (populateCaches)
+                {
+                    // Destroy previous caches -- start caches from scratch every time
+                    ignite.DestroyCache(Client.CACHE_NAME);
+                    ignite.DestroyCache(Account.CACHE_NAME);
 
-                // Create Account cache
-                var accountCfg = Account.CacheCfg();
-                var accountCache = ignite.GetOrCreateCache<AccountKey, Account>(accountCfg);
+                    // Create Client cache
+                    var clientCfg = Client.CacheCfg();
+                    var clientCache = ignite.GetOrCreateCache<long, Client>(clientCfg);
 
-                // Calculate the total number of jobs required (based upon number of nodes and cpus/node)
-                var nodeCount = ignite.GetCluster().GetNodes().Count - 1;
-                var jobCount = nodeCount * numProcessorsPerDataNode;
+                    // Create Account cache
+                    var accountCfg = Account.CacheCfg();
+                    var accountCache = ignite.GetOrCreateCache<AccountKey, Account>(accountCfg);
 
-                // Calculate the number and size of batches needed to distribute and populate clients in the compute grid.
-                var batchCount = numClients / jobCount + 1;
-                var batchSize = numClients / batchCount;
+                    // Calculate the total number of jobs required (based upon number of nodes and cpus/node)
+                    var nodeCount = ignite.GetCluster().GetNodes().Count - 1;
+                    var jobCount = nodeCount * numProcessorsPerDataNode;
 
-
-                // ***********   Populate and test Client records using the compute grid  ******************************
-
-                Console.WriteLine("Begin CLIENT generation using cache {0}: {1}", clientCache.Name, DateTime.Now.ToString("h:mm:ss tt"));
-
-                var actions = BuildClientActionsUsing(numClients, clientCache.Name, batchCount, batchSize);
-                ignite.GetCluster().ForDataNodes(clientCache.Name).GetCompute().Run(actions);
-
-                Console.WriteLine("Begin CLIENT testing using cache {0}: {1}", clientCache.Name, DateTime.Now.ToString("h:mm:ss tt"));
-
-                TestClientsUsing(clientCache, 1000);
-
-                Console.WriteLine("End CLIENT generation/test: {0}", DateTime.Now.ToString("h:mm:ss tt"));
+                    // Calculate the number and size of batches needed to distribute and populate clients in the compute grid.
+                    var batchCount = numClients / jobCount + 1;
+                    var batchSize = numClients / batchCount;
 
 
-                // ***********   Populate and test Account records using the compute grid  ******************************
+                    // ***********   Populate and test Client records using the compute grid  ******************************
 
-                actions = BuildAccountActions(numClients, accountCache.Name, numAccountsPerClient, batchCount, batchSize);
+                    Console.WriteLine("Begin CLIENT generation using cache {0}: {1}", clientCache.Name, DateTime.Now.ToString("h:mm:ss tt"));
 
-                Console.WriteLine("Begin ACCOUNT generation using cache {0}: {1}", accountCache.Name, DateTime.Now.ToString("h:mm:ss tt"));
+                    var actions = BuildClientActionsUsing(numClients, clientCache.Name, batchCount, batchSize);
+                    ignite.GetCluster().ForDataNodes(clientCache.Name).GetCompute().Run(actions);
 
-                ignite.GetCluster().ForDataNodes(accountCache.Name).GetCompute().Run(actions);
+                    Console.WriteLine("Begin CLIENT testing using cache {0}: {1}", clientCache.Name, DateTime.Now.ToString("h:mm:ss tt"));
 
-                Console.WriteLine("Begin ACCOUNT testing using cache {0}: {1}", accountCache.Name, DateTime.Now.ToString("h:mm:ss tt"));
+                    TestClientsUsing(clientCache, 1000);
 
-                TestAccountsUsing(accountCache, 1000);
+                    Console.WriteLine("End CLIENT generation/test: {0}", DateTime.Now.ToString("h:mm:ss tt"));
 
-                Console.WriteLine("End ACCOUNT generation/test: {0}", DateTime.Now.ToString("h:mm:ss tt"));
+
+                    // ***********   Populate and test Account records using the compute grid  ******************************
+
+                    actions = BuildAccountActions(numClients, accountCache.Name, numAccountsPerClient, batchCount, batchSize);
+
+                    Console.WriteLine("Begin ACCOUNT generation using cache {0}: {1}", accountCache.Name, DateTime.Now.ToString("h:mm:ss tt"));
+
+                    ignite.GetCluster().ForDataNodes(accountCache.Name).GetCompute().Run(actions);
+
+                    Console.WriteLine("Begin ACCOUNT testing using cache {0}: {1}", accountCache.Name, DateTime.Now.ToString("h:mm:ss tt"));
+
+                    TestAccountsUsing(accountCache, 1000);
+
+                    Console.WriteLine("End ACCOUNT generation/test: {0}", DateTime.Now.ToString("h:mm:ss tt"));
+
+                }
+
+                Console.WriteLine();
+                Console.WriteLine(">>> Example: .Net-C#/Java Compute Tasks");
+                Console.WriteLine(">>> Demonstrate .Net/C# compute tasks invoking Java compute tasks on any/all GridGain cluster server node(s).");
+                Console.WriteLine();
+                       
+                for (int id = minTestClientId; id <= maxTestClientId; id++)
+                {
+                    Decimal aggrBalance = (Decimal)ignite.GetCompute().Call(new FuncSumBalancesForClient(id));
+                    Console.WriteLine("Aggregate balance for client {0}: {1:C}", id, aggrBalance);
+                }
+
+                Console.WriteLine();
+                Console.WriteLine(">>> Find all clients with an aggregate account balance less than: {0:C} {1}", aggrBalanceLimit, DateTime.Now.ToString("h:mm:ss tt"));
+                var hits = (List<AggregateBalance>)ignite.GetCompute().Call(new FuncFindClientsWithAggregateBalanceLessThan(aggrBalanceLimit));
+                Console.WriteLine(String.Format("{0} Clients found: {1}", hits.Count, DateTime.Now.ToString("h:mm:ss tt")) );
+                foreach (var hit in hits) Console.WriteLine(hit);
+                Console.WriteLine(String.Format("{0} Clients found: {1}", hits.Count, DateTime.Now.ToString("h:mm:ss tt")));
+
+                Console.WriteLine();
+                Console.WriteLine(">>> Example finished, press any key to exit ...");
 
 
                 // ***********   End ClientNode actions  ******************************

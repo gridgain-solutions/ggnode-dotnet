@@ -53,7 +53,7 @@ namespace Schwab.Shared
         public static string SchwabDemoSpringConfigUrl = "config\\local-dotnet-server-config.xml";
         //public static string SchwabDemoOptionalPath = "gg/optional";
         //public static string SchwabDemoUserlibsPath = "gg/userlibs";
-        public static string SchwabDemoJvmClassPath = null; // "C:\\clients\\Schwab\\demo\\gg\\userlibs\\model-1.0.jar;C:\\clients\\Schwab\\demo\\gg\\userlibs\\application-1.0.jar";
+        public static string SchwabDemoJvmClassPath = "C:\\clients\\Schwab\\demo\\ggnode-dotnet\\gg\\userlibs\\model-1.0.jar;C:\\clients\\Schwab\\demo\\ggnode-dotnet\\gg\\userlibs\\application-1.0.jar";
 
         /// <summary>
         /// Initializes the <see cref="Utils"/> class.
@@ -102,8 +102,8 @@ namespace Schwab.Shared
                 PeerAssemblyLoadingMode = PeerAssemblyLoadingMode.CurrentAppDomain,
                 JavaPeerClassLoadingEnabled = true,
                 SpringConfigUrl = SchwabDemoSpringConfigUrl,
-                JvmClasspath = SchwabDemoJvmClassPath
-                // BinaryConfiguration = new BinaryConfiguration(typeof(FuncSumBalancesForClient))
+                JvmClasspath = SchwabDemoJvmClassPath,
+                BinaryConfiguration = new BinaryConfiguration(typeof(FuncSumBalancesForClient))
             };
         }
 
@@ -122,7 +122,7 @@ namespace Schwab.Shared
             return new IgniteConfiguration(GetServerNodeConfiguration())
             {
                 ClientMode = true,
-                // BinaryConfiguration = new BinaryConfiguration(typeof(FuncSumBalancesForClient)),
+                BinaryConfiguration = new BinaryConfiguration(typeof(FuncSumBalancesForClient)),
                 /*
                 PluginConfigurations = new IPluginConfiguration[]
                 {
