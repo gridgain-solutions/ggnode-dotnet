@@ -50,14 +50,11 @@
         public int Type { get; set; }
 
         [QuerySqlField]
-        public long Balance { get; set; }
-
-        [QuerySqlField]
-        public string Status { get; set; }
+        public Decimal Balance { get; set; }
 
         public override string ToString()
         {
-            return String.Format("{0} [Name={1}, Type={2}, Balance={3}, Status={4}]", typeof(Account).Name, Name, Type, Balance, Status);
+            return String.Format("{0}[Name={1}, Type={2}, Balance={3:C}]", typeof(Account).Name, Name, Type, Balance);
         }
 
         private static string CollectionToString<T>(ICollection<T> col)

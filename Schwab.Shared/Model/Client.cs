@@ -11,6 +11,7 @@
     {
         public static string SQL_SCHEMA = "SDEMO";
         public static string CACHE_NAME = "CLIENT_CACHE";
+        public static String[] LEVELS = {"Bronze", "Silver", "Gold", "Platinum"};
         
         public static CacheConfiguration CacheCfg() {
 
@@ -28,7 +29,7 @@
                         Fields = new[] {
                             new QueryField("Id", typeof(long)),
                             new QueryField("Name", typeof(string)),
-                            new QueryField("Status", typeof(string))
+                            new QueryField("Level", typeof(int))
                         }
                     }
                 }
@@ -39,11 +40,11 @@
         public string Name { get; set; }
 
         // [QuerySqlField] - Annotation method not used (for same reason above).
-        public string Status { get; set; }
+        public int Level { get; set; }
 
         public override string ToString()
         {
-            return string.Format("{0} [Name={1}, Status={2}]", typeof(Client).Name, Name, Status);
+            return string.Format("{0}[Name={1}, Level={2}]", typeof(Client).Name, Name, LEVELS[Level]);
         }
 
         private static string CollectionToString<T>(ICollection<T> col)

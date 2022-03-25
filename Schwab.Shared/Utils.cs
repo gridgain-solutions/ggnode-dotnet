@@ -54,6 +54,7 @@ namespace Schwab.Shared
         //public static string SchwabDemoOptionalPath = "gg/optional";
         //public static string SchwabDemoUserlibsPath = "gg/userlibs";
         public static string SchwabDemoJvmClassPath = "C:\\clients\\Schwab\\demo\\ggnode-dotnet\\gg\\userlibs\\model-1.0.jar;C:\\clients\\Schwab\\demo\\ggnode-dotnet\\gg\\userlibs\\application-1.0.jar";
+        // public static string SchwabDemoJvmClassPath = "C:\\clients\\Schwab\\demo\\ggnode\\model\\target\\model-1.0.jar;C:\\clients\\Schwab\\demo\\ggnode\\application\\target\\application-1.0.jar";
 
         /// <summary>
         /// Initializes the <see cref="Utils"/> class.

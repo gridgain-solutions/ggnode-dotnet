@@ -52,7 +52,7 @@ namespace Schwab.ClientNode
                 long maxId = _clientFirstKey + _clientKeyCount;
                 for (long id = _clientFirstKey; id < maxId; id++)
                 {
-                    var client = new Client { Name = String.Format("C{0}", id.ToString().PadLeft(7, '0')), Status = "New" };
+                    var client = new Client { Name = String.Format("C{0}", id.ToString().PadLeft(7, '0')), Level = 0 };
                     streamer.Add(id, client);
                 }
             }
@@ -90,13 +90,10 @@ namespace Schwab.ClientNode
                     {
                         var accountId = clientId * _numAccountsPerClient + accountNum;
                         var accountName = string.Format("C{0}.A{1}", clientId, accountNum);
-                        var accountBal = random.Next(0, 50_000);
-
-                        // var accountKey = new AffinityKey(accId, clientId);
-                        // var account = new Account { Id = accId, ClientId = clientId, Name = accName, Type = 0, Balance = accBal, Status = "New" };
+                        var accountBal = new Decimal(random.Next(0, 50_000));
 
                         var accountKey = new AccountKey { Id = accountId, ClientId = clientId };
-                        var account = new Account { Name = accountName, Type = 0, Balance = accountBal, Status = "New" };
+                        var account = new Account { Name = accountName, Type = 0, Balance = accountBal };
 
                         streamer.Add(accountKey, account);
                     }
@@ -162,7 +159,7 @@ namespace Schwab.ClientNode
 
         static void TestClientsUsing(ICache<long, Client> cache, int modulus)
         {
-            IList<IList<object>> res = cache.Query(new SqlFieldsQuery("SELECT * FROM Client")).GetAll();
+            IList<IList<object>> res = cache.Query(new SqlFieldsQuery("SELECT COUNT(*) FROM Client")).GetAll();
             
             var numClients = (long)res[0][0];
             Console.WriteLine("SELECT Count(*) FROM Client --> " + numClients);
@@ -180,7 +177,7 @@ namespace Schwab.ClientNode
 
         static void TestAccountsUsing(ICache<AccountKey, Account> cache, int modulus)
         {
-            IList<IList<object>> res = cache.Query(new SqlFieldsQuery("SELECT * FROM Account")).GetAll();
+            IList<IList<object>> res = cache.Query(new SqlFieldsQuery("SELECT COUNT(*) FROM Account")).GetAll();
 
             var numAccounts = (long)res[0][0];
             Console.WriteLine("SELECT Count(*) FROM Account --> " + numAccounts);
@@ -191,7 +188,7 @@ namespace Schwab.ClientNode
                 foreach (var entry in cursor)
                 {
                     if (++i == 1 || i % modulus == 0 || i == numAccounts)
-                        Console.WriteLine(i + ": Account = " + entry.Key.Id + ", Client = " + entry.Key.ClientId + ", Value = " + entry.Value);
+                        Console.WriteLine(i + ": KEY = AccountKey[Id=" + entry.Key.Id + ", Client = " + entry.Key.ClientId + "], Value = " + entry.Value);
                 }
             }
         }
