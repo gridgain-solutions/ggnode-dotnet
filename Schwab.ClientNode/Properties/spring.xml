@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util
+       http://www.springframework.org/schema/util/spring-util-3.0.xsd">
+
+    <bean id="ignite.properties"
+          class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="targetObject" value="#{@systemProperties}"/>
+        <property name="targetMethod" value="putAll"/>
+        <property name="arguments">
+            <util:properties>
+                <!-- Enable opt-in features: -->
+                <prop key="IGNITE_ENABLE_EXPERIMENTAL_COMMAND">true</prop>
+                <prop key="IGNITE_BASELINE_AUTO_ADJUST_FEATURE">true</prop>
+                <prop key="IGNITE_BASELINE_FOR_IN_MEMORY_CACHES_FEATURE">true</prop>
+                <prop key="IGNITE_CLUSTER_ID_AND_TAG_FEATURE">true</prop>
+                <prop key="IGNITE_DISTRIBUTED_META_STORAGE_FEATURE">true</prop>
+
+                <!-- For production deployments, exclude user data from logs: -->
+                <prop key="IGNITE_TO_STRING_INCLUDE_SENSITIVE">true</prop>
+                <!-- Single node per JVM: -->
+                <prop key="IGNITE_MBEAN_APPEND_CLASS_LOADER_ID">false</prop>
+                <!-- New service processor implementation: -->
+                <prop key="IGNITE_EVENT_DRIVEN_SERVICE_PROCESSOR_ENABLED">true</prop>
+                <!-- Avoid legacy schema issues when building binary objects: -->
+                <prop key="IGNITE_BINARY_SORT_OBJECT_FIELDS">true</prop>
+            </util:properties>
+        </property>
+    </bean>
+
+
+    <bean id="grid.cfg" depends-on="ignite.properties"
+          class="org.apache.ignite.configuration.IgniteConfiguration">
+        <property name="peerClassLoadingEnabled" value="false"/>
+
+
+
+
+
+        <!-- Ssl context. -->
+        <property name="sslContextFactory">
+            <bean class="org.apache.ignite.ssl.SslContextFactory">
+                <property name="keyStorePassword" value="123456"/>
+                <property name="trustStorePassword" value="123456"/>
+            </bean>
+        </property>
+
+        <property name="discoverySpi">
+            <bean class="org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi">
+                <!-- Changing initial local port number for nodes from this data center. -->
+                <property name="ipFinder">
+                    <bean class="org.apache.ignite.spi.discovery.tcp.ipfinder.vm.TcpDiscoveryVmIpFinder">
+                        <property name="addresses">
+                            <list>
+                                <!-- IP address and port ranges of nodes from this data center. -->
+                                <value>5558dc15-f0a7-4593-a1fa-65e0a7dcf853.gridgain-nebula.com:47500</value>
+                            </list>
+                        </property>
+                    </bean>
+                </property>
+            </bean>
+        </property>
+
+        <!--
+            Since the example is started on a single physical machine we need to configure specific TCP communication
+            SPI for each data center so that nodes from different data centers don't see each other.
+        -->
+        <property name="communicationSpi">
+            <bean class="org.apache.ignite.spi.communication.tcp.TcpCommunicationSpi">
+                <property name="forceClientToServerConnections" value="true"/>
+            </bean>
+        </property>
+
+
+
+        <property name="igniteInstanceName" value="nebula-node-client"/>
+        <property name="clientMode" value="true"/>
+
+
+
+
+        <!--        <property name="pluginConfigurations">-->
+        <!--            <list>-->
+        <!--                <bean class="org.gridgain.grid.configuration.GridGainConfiguration">-->
+        <!--                    <property name="rollingUpdatesEnabled" value="true"/>-->
+        <!--                   -->
+        <!--                </bean>-->
+        <!--            </list>-->
+        <!--        </property>-->
+    </bean>
+
+</beans>

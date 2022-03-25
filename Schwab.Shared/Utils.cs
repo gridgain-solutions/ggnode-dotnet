@@ -53,7 +53,12 @@ namespace Schwab.Shared
         public static string SchwabDemoSpringConfigUrl = "config\\local-dotnet-server-config.xml";
         //public static string SchwabDemoOptionalPath = "gg/optional";
         //public static string SchwabDemoUserlibsPath = "gg/userlibs";
-        public static string SchwabDemoJvmClassPath = "C:\\clients\\Schwab\\demo\\ggnode-dotnet\\gg\\userlibs\\model-1.0.jar;C:\\clients\\Schwab\\demo\\ggnode-dotnet\\gg\\userlibs\\application-1.0.jar";
+        
+        
+        //public static string SchwabDemoJvmClassPath = "C:\\clients\\Schwab\\demo\\ggnode-dotnet\\gg\\userlibs\\model-1.0.jar;C:\\clients\\Schwab\\demo\\ggnode-dotnet\\gg\\userlibs\\application-1.0.jar";
+        
+        
+        
         // public static string SchwabDemoJvmClassPath = "C:\\clients\\Schwab\\demo\\ggnode\\model\\target\\model-1.0.jar;C:\\clients\\Schwab\\demo\\ggnode\\application\\target\\application-1.0.jar";
 
         /// <summary>
@@ -88,13 +93,13 @@ namespace Schwab.Shared
                 {
                     "-DIGNITE_QUIET=true",
                     "-DIGNITE_PERFORMANCE_SUGGESTIONS_DISABLED=true",
-                    "--add-exports=java.base/jdk.internal.misc=ALL-UNNAMED",
-                    "--add-exports=java.base/sun.nio.ch=ALL-UNNAMED",
-                    "--add-exports=java.management/com.sun.jmx.mbeanserver=ALL-UNNAMED",
-                    "--add-exports=jdk.internal.jvmstat/sun.jvmstat.monitor=ALL-UNNAMED",
-                    "--add-exports=java.base/sun.reflect.generics.reflectiveObjects=ALL-UNNAMED",
-                    "--add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED",
-                    "--illegal-access="
+                    // "--add-exports=java.base/jdk.internal.misc=ALL-UNNAMED",
+                    // "--add-exports=java.base/sun.nio.ch=ALL-UNNAMED",
+                    // "--add-exports=java.management/com.sun.jmx.mbeanserver=ALL-UNNAMED",
+                    // "--add-exports=jdk.internal.jvmstat/sun.jvmstat.monitor=ALL-UNNAMED",
+                    // "--add-exports=java.base/sun.reflect.generics.reflectiveObjects=ALL-UNNAMED",
+                    // "--add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED",
+                    // "--illegal-access="
                 },
                 Logger = new ConsoleLogger
                 {
@@ -103,7 +108,7 @@ namespace Schwab.Shared
                 PeerAssemblyLoadingMode = PeerAssemblyLoadingMode.CurrentAppDomain,
                 JavaPeerClassLoadingEnabled = true,
                 SpringConfigUrl = SchwabDemoSpringConfigUrl,
-                JvmClasspath = SchwabDemoJvmClassPath,
+                //JvmClasspath = SchwabDemoJvmClassPath,
                 BinaryConfiguration = new BinaryConfiguration(typeof(FuncSumBalancesForClient))
             };
         }

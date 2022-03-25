@@ -1,30 +1,14 @@
 ﻿using Apache.Ignite.Core;
-using Apache.Ignite.Core.Communication.Tcp;
 using Apache.Ignite.Core.Compute;
-using Apache.Ignite.Core.Configuration;
-using Apache.Ignite.Core.Deployment;
-using Apache.Ignite.Core.Discovery.Tcp;
-using Apache.Ignite.Core.Discovery.Tcp.Static;
-using Apache.Ignite.Core.Plugin;
-using Apache.Ignite.Core.Ssl;
 using Apache.Ignite.Core.Resource;
-using Apache.Ignite.Core.Log;
-
-using GridGain.Core;
-using GridGain.Core.Security;
-
 using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Globalization;
 using Schwab.Shared;
 using Schwab.Shared.Model;
-using Apache.Ignite.Core.Cache.Affinity;
 using Apache.Ignite.Core.Cache;
-using Apache.Ignite.Core.Binary;
-using Apache.Ignite.Core.Datastream;
 using Apache.Ignite.Core.Cache.Query;
-using Apache.Ignite.Core.Cache.Configuration;
 
 
 namespace Schwab.ClientNode

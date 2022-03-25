@@ -3,25 +3,17 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
 	<Deterministic>false</Deterministic>
-    <AssemblyVersion>1.0.0.2</AssemblyVersion>
+    <AssemblyVersion>1.0.0</AssemblyVersion>
   </PropertyGroup>
 
-  <ItemGroup>
-    <None Remove="C:\Users\david.neubert\.nuget\packages\gridgain.ignite\8.8.10\build\output\config\server-config.xml" />
-  </ItemGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
 
-  <ItemGroup>
-    <None Remove="C:\Users\david.neubert\.nuget\packages\gridgain.ignite\8.8.10\build\output\config\server-config.xml" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="C:\Users\david.neubert\.nuget\packages\gridgain.ignite\8.8.10\build\output\config\client-config.xml" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="C:\Users\david.neubert\.nuget\packages\gridgain.ignite\8.8.10\build\output\config\client-config.xml" />
-  </ItemGroup>
-
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+  
   <ItemGroup>
     <PackageReference Include="GridGain" Version="8.8.14" />
   </ItemGroup>
