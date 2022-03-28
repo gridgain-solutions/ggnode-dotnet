@@ -17,5 +17,11 @@
   <ItemGroup>
     <PackageReference Include="GridGain" Version="8.8.14" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <None Update="resources\ignite-config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 
 </Project>

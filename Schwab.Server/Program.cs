@@ -12,9 +12,15 @@ namespace Schwab.Server
         static void Main(string[] args)
         {
             IgniteConfiguration igniteConfig;
+            
+            Console.WriteLine(Environment.GetEnvironmentVariable("JAVA_HOME"));
+            
 
             using (var ignite = Ignition.Start(igniteConfig = Utils.GetServerNodeConfiguration()))
             {
+                
+                Console.WriteLine(ignite.GetConfiguration().JvmClasspath);
+                
                 Utils.DeployDefaultServices(ignite);
 
                 Console.WriteLine(">>> Server node started, press any key to exit ...");

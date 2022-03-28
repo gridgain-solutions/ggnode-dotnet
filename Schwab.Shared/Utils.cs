@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+using System.Linq;
+
 namespace Schwab.Shared
 {
     using System;
@@ -50,7 +52,7 @@ namespace Schwab.Shared
 
         // Hard-wired setttings (that were used before converting to enviroment variables above)
         // public static string SchwabDemoSpringConfigUrl = "C:\\clients\\Schwab\\demo\\gg\\config\\nebula-server-config.xml";
-        public static string SchwabDemoSpringConfigUrl = "config\\local-dotnet-server-config.xml";
+        public static string SchwabDemoSpringConfigUrl = "resources\\ignite-config.xml";
         //public static string SchwabDemoOptionalPath = "gg/optional";
         //public static string SchwabDemoUserlibsPath = "gg/userlibs";
         
@@ -61,13 +63,41 @@ namespace Schwab.Shared
         
         // public static string SchwabDemoJvmClassPath = "C:\\clients\\Schwab\\demo\\ggnode\\model\\target\\model-1.0.jar;C:\\clients\\Schwab\\demo\\ggnode\\application\\target\\application-1.0.jar";
 
+        private static string GetUserClassPath()
+        {
+            const string target = "ggnode";
+            DirectoryInfo currentPath = new DirectoryInfo(Directory.GetCurrentDirectory());
+            while (true)
+            {
+                if (currentPath == null || currentPath.Root == currentPath)
+                {
+                    throw new FileNotFoundException("Unable to locate ggnode repository");
+                }
+                
+                if (currentPath.GetDirectories(target).Length == 1)
+                {
+                    break;
+                }
+
+                currentPath = Directory.GetParent(currentPath.FullName);
+            }
+            
+            var result = Directory.GetFiles(currentPath.GetDirectories(target).Single().FullName, "*.jar", SearchOption.AllDirectories);
+            string classPath =  String.Join(":", result);
+            
+
+            //return classPath + ":";
+            return classPath;
+
+        }
+
         /// <summary>
         /// Initializes the <see cref="Utils"/> class.
         /// </summary>
         static Utils()
         {
             // Only necessary during Ignite development.
-            Environment.SetEnvironmentVariable("IGNITE_NATIVE_TEST_CLASSPATH", "true");
+            // Environment.SetEnvironmentVariable("IGNITE_NATIVE_TEST_CLASSPATH", "true");
         }
 
         /// <summary>
@@ -87,30 +117,38 @@ namespace Schwab.Shared
             //    },
             //    SocketTimeout = TimeSpan.FromSeconds(0.3)
             //},
-            return new IgniteConfiguration
+            
+            
+            Environment.SetEnvironmentVariable("IGNITE_LOG_CLASSPATH_CONTENT_ON_STARTUP", "true");
+            Environment.SetEnvironmentVariable("IGNITE_QUIET", "false");
+            
+            var cfg = new IgniteConfiguration
             {
                 JvmOptions = new[]
                 {
                     "-DIGNITE_QUIET=true",
                     "-DIGNITE_PERFORMANCE_SUGGESTIONS_DISABLED=true",
-                    // "--add-exports=java.base/jdk.internal.misc=ALL-UNNAMED",
-                    // "--add-exports=java.base/sun.nio.ch=ALL-UNNAMED",
-                    // "--add-exports=java.management/com.sun.jmx.mbeanserver=ALL-UNNAMED",
-                    // "--add-exports=jdk.internal.jvmstat/sun.jvmstat.monitor=ALL-UNNAMED",
-                    // "--add-exports=java.base/sun.reflect.generics.reflectiveObjects=ALL-UNNAMED",
-                    // "--add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED",
-                    // "--illegal-access="
+                    "--add-exports=java.base/jdk.internal.misc=ALL-UNNAMED",
+                    "--add-exports=java.base/sun.nio.ch=ALL-UNNAMED",
+                    "--add-exports=java.management/com.sun.jmx.mbeanserver=ALL-UNNAMED",
+                    "--add-exports=jdk.internal.jvmstat/sun.jvmstat.monitor=ALL-UNNAMED",
+                    "--add-exports=java.base/sun.reflect.generics.reflectiveObjects=ALL-UNNAMED",
+                    "--add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED",
+                    "--illegal-access="
                 },
-                Logger = new ConsoleLogger
-                {
-                    MinLevel = LogLevel.Error
-                },
+                // Logger = new ConsoleLogger
+                // {
+                //     MinLevel = LogLevel.Error
+                // },
                 PeerAssemblyLoadingMode = PeerAssemblyLoadingMode.CurrentAppDomain,
                 JavaPeerClassLoadingEnabled = true,
                 SpringConfigUrl = SchwabDemoSpringConfigUrl,
-                //JvmClasspath = SchwabDemoJvmClassPath,
+                JvmClasspath = GetUserClassPath(),
                 BinaryConfiguration = new BinaryConfiguration(typeof(FuncSumBalancesForClient))
             };
+            Console.WriteLine(cfg.JvmClasspath);
+
+            return cfg;
         }
 
 

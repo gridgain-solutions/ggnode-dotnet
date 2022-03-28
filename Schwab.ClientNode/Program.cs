@@ -199,13 +199,14 @@ namespace Schwab.ClientNode
         static void Main(string[] args)
         {
             // Program argument - default values
-            const long DEFAULT_NUM_CLIENTS = 1_000_000;
+            const long DEFAULT_NUM_CLIENTS = 1000;
+            //const long DEFAULT_NUM_CLIENTS = 1_000_000;
             const long DEFAULT_NUM_ACCOUNTS_PER_CLIENT = 10; // 10_000;
             const decimal DEFAULT_AGGR_BALANCE_LIMIT = 75000M;
             const int DEFAULT_NUM_PROCESSORS_PER_DATA_NODE = 3;  // 8;
 
             const int DEFAULT_MIN_TEST_CLIENT_ID = 1;
-            const int DEFAULT_MAX_TEST_CLIENT_ID = 100;
+            const int DEFAULT_MAX_TEST_CLIENT_ID = 10;
 
             // Program argument - run time values
             long numClients;
@@ -236,9 +237,10 @@ namespace Schwab.ClientNode
             using (IIgnite ignite = Ignition.Start(cfg))
             {
                 Console.Write("Initialize and populate caches: Y/N [N]");
-                string ok = Console.ReadLine().Trim().ToLower();
-                bool populateCaches = ok.Length > 0 && ok[0] == 'y';
+               // string ok = Console.ReadLine().Trim().ToLower();
+              //  bool populateCaches = ok.Length > 0 && ok[0] == 'y';
 
+              bool populateCaches = true;
                 if (populateCaches)
                 {
                     // Destroy previous caches -- start caches from scratch every time
