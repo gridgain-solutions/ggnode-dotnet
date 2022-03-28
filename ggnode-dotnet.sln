@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Schwab.Server", "Schwab.Ser
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Schwab.ClientNode", "Schwab.ClientNode\Schwab.ClientNode.csproj", "{B46272CF-E655-49C3-A57B-3FA0D3325084}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shwab.Compute", "Shwab.Compute\Shwab.Compute.csproj", "{82C9C244-095F-446D-83B3-67FEE60E27FE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{B46272CF-E655-49C3-A57B-3FA0D3325084}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B46272CF-E655-49C3-A57B-3FA0D3325084}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B46272CF-E655-49C3-A57B-3FA0D3325084}.Release|Any CPU.Build.0 = Release|Any CPU
+		{82C9C244-095F-446D-83B3-67FEE60E27FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{82C9C244-095F-446D-83B3-67FEE60E27FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{82C9C244-095F-446D-83B3-67FEE60E27FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{82C9C244-095F-446D-83B3-67FEE60E27FE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

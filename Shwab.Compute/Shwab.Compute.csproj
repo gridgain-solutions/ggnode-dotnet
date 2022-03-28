@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netcoreapp2.1</TargetFramework>
+        <Deterministic>false</Deterministic>
+        <AssemblyVersion>1.0.*</AssemblyVersion>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <TargetFramework>netcoreapp2.1</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="GridGain.Ignite" Version="8.8.14" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Schwab.Shared\Schwab.Shared.csproj" />
+    </ItemGroup>
+
+</Project>

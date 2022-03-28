@@ -1,14 +1,13 @@
-﻿using Apache.Ignite.Core;
-using Apache.Ignite.Core.Cache.Query;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Apache.Ignite.Core;
 using Apache.Ignite.Core.Compute;
 using Apache.Ignite.Core.Log;
 using Apache.Ignite.Core.Resource;
 using Schwab.Shared.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
-namespace Schwab.Shared
+namespace Shwab.Compute
 {
     public class FuncFindClientsWithAggregateBalanceLessThan : IComputeFunc<List<AggregateBalance>>
     {

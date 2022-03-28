@@ -9,6 +9,7 @@ using Schwab.Shared;
 using Schwab.Shared.Model;
 using Apache.Ignite.Core.Cache;
 using Apache.Ignite.Core.Cache.Query;
+using Shwab.Compute;
 
 
 namespace Schwab.ClientNode
@@ -233,7 +234,7 @@ namespace Schwab.ClientNode
 
             // Main program implementation
 
-            IgniteConfiguration cfg = Utils.GetClientNodeConfiguration();
+            IgniteConfiguration cfg = ClientUtils.GetClientNodeConfiguration();
             using (IIgnite ignite = Ignition.Start(cfg))
             {
                 Console.Write("Initialize and populate caches: Y/N [N]");

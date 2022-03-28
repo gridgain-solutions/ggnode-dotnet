@@ -136,15 +136,11 @@ namespace Schwab.Shared
                     "--add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED",
                     "--illegal-access="
                 },
-                // Logger = new ConsoleLogger
-                // {
-                //     MinLevel = LogLevel.Error
-                // },
                 PeerAssemblyLoadingMode = PeerAssemblyLoadingMode.CurrentAppDomain,
                 JavaPeerClassLoadingEnabled = true,
                 SpringConfigUrl = SchwabDemoSpringConfigUrl,
                 JvmClasspath = GetUserClassPath(),
-                BinaryConfiguration = new BinaryConfiguration(typeof(FuncSumBalancesForClient))
+                //BinaryConfiguration = new BinaryConfiguration(typeof(FuncSumBalancesForClient))
             };
             Console.WriteLine(cfg.JvmClasspath);
 
@@ -157,31 +153,6 @@ namespace Schwab.Shared
             Login = "sdemo",
             Password = "my1testkey"
         };
-
-        /// <summary>
-        /// Gets the thick client node configuration.
-        /// </summary>
-        public static IgniteConfiguration GetClientNodeConfiguration()
-        {
-            return new IgniteConfiguration(GetServerNodeConfiguration())
-            {
-                ClientMode = true,
-                BinaryConfiguration = new BinaryConfiguration(typeof(FuncSumBalancesForClient)),
-                /*
-                PluginConfigurations = new IPluginConfiguration[]
-                {
-                    new GridGainPluginConfiguration
-                    {
-                        SecurityCredentialsProvider = new SecurityCredentialsBasicProvider
-                        {
-                            Credentials = clientCredentials
-                        },
-                        RollingUpdatesEnabled = true,
-                    },
-                }
-                */
-            };
-        }
 
         /// <summary>
         /// Gets the thin client node configuration.

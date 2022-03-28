@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Schwab.Shared\Schwab.Shared.csproj" />
+    <ProjectReference Include="..\Shwab.Compute\Shwab.Compute.csproj" />
   </ItemGroup>
 
 </Project>
