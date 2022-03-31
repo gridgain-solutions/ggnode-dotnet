@@ -4,6 +4,7 @@
       "commandName": "Project",
       "environmentVariables": {
         "IGNITE_LOG_CLASSPATH_CONTENT_ON_STARTUP": "true",
+        "IsNebula": "false",
         "JAVA_HOME": "/Library/Java/JavaVirtualMachines/jdk-11.0.11.jdk/Contents/Home"
       }
     },
@@ -11,6 +12,15 @@
       "commandName": "Docker",
       "environmentVariables": {
         "IGNITE_LOG_CLASSPATH_CONTENT_ON_STARTUP": "true",
+        "IsNebula": "false",
+        "JAVA_HOME": "/Library/Java/JavaVirtualMachines/jdk-11.0.11.jdk/Contents/Home"
+      }
+    },
+    "Schwab.Client.Nebula": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "IGNITE_LOG_CLASSPATH_CONTENT_ON_STARTUP": "true",
+        "IsNebula": "true",
         "JAVA_HOME": "/Library/Java/JavaVirtualMachines/jdk-11.0.11.jdk/Contents/Home"
       }
     }

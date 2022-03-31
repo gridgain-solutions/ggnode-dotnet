@@ -105,37 +105,25 @@ namespace Schwab.Shared
         /// </summary>
         public static IgniteConfiguration GetServerNodeConfiguration()
         {
-            // None of the options below are mandatory for the examples to work.
-            // * Discovery and localhost settings improve startup time
-            // * Logging options reduce console output
-            //Localhost = "127.0.0.1",
-            //DiscoverySpi = new TcpDiscoverySpi
-            //{
-            //    IpFinder = new TcpDiscoveryStaticIpFinder
-            //    {
-            //        Endpoints = new[] { "127.0.0.1:47500..47505" }
-            //    },
-            //    SocketTimeout = TimeSpan.FromSeconds(0.3)
-            //},
-            
-            
             Environment.SetEnvironmentVariable("IGNITE_LOG_CLASSPATH_CONTENT_ON_STARTUP", "true");
             Environment.SetEnvironmentVariable("IGNITE_QUIET", "false");
             
+            
             var cfg = new IgniteConfiguration
             {
-                JvmOptions = new[]
-                {
-                    "-DIGNITE_QUIET=true",
-                    "-DIGNITE_PERFORMANCE_SUGGESTIONS_DISABLED=true",
-                    "--add-exports=java.base/jdk.internal.misc=ALL-UNNAMED",
-                    "--add-exports=java.base/sun.nio.ch=ALL-UNNAMED",
-                    "--add-exports=java.management/com.sun.jmx.mbeanserver=ALL-UNNAMED",
-                    "--add-exports=jdk.internal.jvmstat/sun.jvmstat.monitor=ALL-UNNAMED",
-                    "--add-exports=java.base/sun.reflect.generics.reflectiveObjects=ALL-UNNAMED",
-                    "--add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED",
-                    "--illegal-access="
-                },
+                // JvmOptions = new[]
+                // {
+                //     "-Djava.net.preferIPv4Stack=true",
+                //     "-DIGNITE_QUIET=false",
+                //     "-DIGNITE_PERFORMANCE_SUGGESTIONS_DISABLED=true",
+                //     "--add-exports=java.base/jdk.internal.misc=ALL-UNNAMED",
+                //     "--add-exports=java.base/sun.nio.ch=ALL-UNNAMED",
+                //     "--add-exports=java.management/com.sun.jmx.mbeanserver=ALL-UNNAMED",
+                //     "--add-exports=jdk.internal.jvmstat/sun.jvmstat.monitor=ALL-UNNAMED",
+                //     "--add-exports=java.base/sun.reflect.generics.reflectiveObjects=ALL-UNNAMED",
+                //     "--add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED",
+                //     "--illegal-access="
+                // },
                 PeerAssemblyLoadingMode = PeerAssemblyLoadingMode.CurrentAppDomain,
                 JavaPeerClassLoadingEnabled = true,
                 SpringConfigUrl = SchwabDemoSpringConfigUrl,
@@ -153,20 +141,6 @@ namespace Schwab.Shared
             Login = "sdemo",
             Password = "my1testkey"
         };
-
-        /// <summary>
-        /// Gets the thin client node configuration.
-        /// </summary>
-        public static IgniteClientConfiguration GetThinClientConfiguration()
-        {
-            return new IgniteClientConfiguration
-            {
-                Endpoints = new[]
-                {
-                    "127.0.0.1"
-                }
-            };
-        }
 
         /// <summary>
         /// Deploys default services.
