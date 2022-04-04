@@ -10,6 +10,7 @@ using Schwab.Shared.Model;
 using Apache.Ignite.Core.Cache;
 using Apache.Ignite.Core.Cache.Query;
 using Shwab.Compute;
+using System.Collections;
 
 
 namespace Schwab.ClientNode
@@ -299,11 +300,12 @@ namespace Schwab.ClientNode
                 Console.WriteLine(">>> Example: .Net-C#/Java Compute Tasks");
                 Console.WriteLine(">>> Demonstrate .Net/C# compute tasks invoking Java compute tasks on any/all GridGain cluster server node(s).");
                 Console.WriteLine();
-                       
-                for (int id = minTestClientId; id <= maxTestClientId; id++)
+
+                Hashtable clientSums = SumBalancesForAllClients(ignite);
+                
+                foreach (DictionaryEntry entry in clientSums)
                 {
-                    Decimal aggrBalance = (Decimal)ignite.GetCompute().Call(new FuncSumBalancesForClient(id));
-                    Console.WriteLine("Aggregate balance for client {0}: {1:C}", id, aggrBalance);
+                    Console.WriteLine($"Client {entry.Key} has balance {entry.Value}");
                 }
 
                 Console.WriteLine();
@@ -324,6 +326,15 @@ namespace Schwab.ClientNode
                 Console.WriteLine(">>> ClientNode actions completed, press any key to exit ...");
 
             }
+        }
+
+        static Hashtable SumBalancesForAllClients(IIgnite ignite)
+        {
+            Hashtable obj = ignite.GetCluster().ForDataNodes(Account.CACHE_NAME).GetCompute()
+                .ExecuteJavaTask<Hashtable>(
+                    "com.gridgain.ignite.ggnode.cgrid.SumBalancesForAllClientsTask", null);
+
+            return obj;
         }
     }
 }
