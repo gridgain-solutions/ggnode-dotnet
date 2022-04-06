@@ -23,6 +23,9 @@ namespace Shwab.Compute
 
         public List<AggregateBalance> Invoke()
         {
+            Console.WriteLine("!!!");
+            Console.WriteLine("FuncFindClientsWithAggregateBalanceLessThan");
+            
             _ignite.Logger.Log(LogLevel.Info, string.Format("{0} invoked.", typeof(FuncFindClientsWithAggregateBalanceLessThan).Name));
 
             // Get client cache
@@ -37,12 +40,12 @@ namespace Shwab.Compute
             foreach (var key in keys)
             {
                 int clientId = Convert.ToInt32(key);
-                var aggrBalance = (Decimal)_ignite.GetCluster().ForLocal().GetCompute().ExecuteJavaTask<Decimal>("com.gridgain.ignite.ggnode.cgrid.SumBalancesForClientTaskLocal", clientId);
+                var aggrBalance = (Decimal?)_ignite.GetCluster().ForLocal().GetCompute().ExecuteJavaTask<Decimal?>("com.gridgain.ignite.ggnode.cgrid.SumBalancesForClientTaskLocal", clientId);
 
-                if (aggrBalance < Val)
+                if (aggrBalance != null && aggrBalance < Val)
                 {
                     //var ab = new AggregateBalance(clientId, (String)row[1], aggrBalance);
-                    var ab = new AggregateBalance(clientId, String.Format("C{0}", key.ToString().PadLeft(7, '0')), aggrBalance);
+                    var ab = new AggregateBalance(clientId, String.Format("C{0}", key.ToString().PadLeft(7, '0')), aggrBalance.Value);
                     found.Add(ab);
                     _ignite.Logger.Log(LogLevel.Debug, string.Format("{0} {1}", typeof(FuncFindClientsWithAggregateBalanceLessThan).Name, ab.ToString()));
                 }

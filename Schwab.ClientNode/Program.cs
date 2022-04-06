@@ -5,91 +5,17 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Globalization;
-using Schwab.Shared;
 using Schwab.Shared.Model;
 using Apache.Ignite.Core.Cache;
 using Apache.Ignite.Core.Cache.Query;
 using Shwab.Compute;
-using System.Drawing;
+using System.Collections;
 
 
 namespace Schwab.ClientNode
 {
-    class GenerateClientsAction : IComputeAction
-    {
-        [InstanceResource] private readonly IIgnite _ignite;
-
-        private readonly long _clientFirstKey;
-        private readonly long _clientKeyCount;
-        private readonly string _clientCacheName;
-
-        public GenerateClientsAction(long clientFirstKey, long clientKeyCount, string clientCacheName)
-        {
-            _clientFirstKey = clientFirstKey;
-            _clientKeyCount = clientKeyCount;
-            _clientCacheName = clientCacheName;
-        }
-
-        public void Invoke()
-        {
-            using (var streamer = _ignite.GetDataStreamer<long, Client>(_clientCacheName))
-            {
-                long maxId = _clientFirstKey + _clientKeyCount;
-                for (long id = _clientFirstKey; id < maxId; id++)
-                {
-                    var client = new Client {Name = String.Format("C{0}", id.ToString().PadLeft(7, '0')), Level = 0};
-                    streamer.Add(id, client);
-                }
-            }
-        }
-    }
-
-    class GenerateAccountsAction : IComputeAction
-    {
-        [InstanceResource] private readonly IIgnite _ignite;
-
-        private readonly long _clientFirstKey;
-        private readonly long _clientKeyCount;
-        private readonly string _accountCacheName;
-        private readonly long _numAccountsPerClient;
-
-        public GenerateAccountsAction(long clientFirstKey, long clientKeyCount, string accountCacheName,
-            long numAccountsPerClient)
-        {
-            _clientFirstKey = clientFirstKey;
-            _clientKeyCount = clientKeyCount;
-            _accountCacheName = accountCacheName;
-            _numAccountsPerClient = numAccountsPerClient;
-        }
-
-        public void Invoke()
-        {
-            Random random = new Random();
-
-            using (var streamer = _ignite.GetDataStreamer<AccountKey, Account>(_accountCacheName))
-            {
-                long maxClientId = _clientFirstKey + _clientKeyCount;
-                for (long clientId = _clientFirstKey; clientId < maxClientId; clientId++)
-                {
-                    for (long accountNum = 0; accountNum < _numAccountsPerClient; accountNum++)
-                    {
-                        var accountId = clientId * _numAccountsPerClient + accountNum;
-                        var accountName = string.Format("C{0}.A{1}", clientId, accountNum);
-                        var accountBal = new Decimal(random.Next(0, 50_000));
-
-                        var accountKey = new AccountKey {Id = accountId, ClientId = clientId};
-                        var account = new Account {Name = accountName, Type = 0, Balance = accountBal};
-
-                        streamer.Add(accountKey, account);
-                    }
-                }
-            }
-        }
-    }
-
     class Program
     {
-
         static List<IComputeAction> BuildClientActionsUsing(long numClients, string cacheName, long batchCount,
             long batchSize)
         {
@@ -120,6 +46,7 @@ namespace Schwab.ClientNode
         static List<IComputeAction> BuildAccountActions(long numClients, string cacheName, long numAccountsPerClient,
             long batchCount, long batchSize)
         {
+            
             var actions = new List<IComputeAction>();
             var lastBatch = batchCount - 1;
 
@@ -142,6 +69,16 @@ namespace Schwab.ClientNode
             }
 
             return actions;
+        }
+        
+        static Hashtable SumBalancesForAllClients(IIgnite ignite)
+        {
+            //Hashtable obj = ignite.GetCluster().ForDataNodes(Account.CACHE_NAME).GetCompute()
+            Hashtable obj = ignite.GetCluster().ForServers().GetCompute()
+                .ExecuteJavaTask<Hashtable>(
+                    "com.gridgain.ignite.ggnode.cgrid.SumBalancesForAllClientsTask", null);
+
+            return obj;
         }
 
         static void TestClientsUsing(ICache<long, Client> cache, int modulus)
@@ -202,10 +139,6 @@ namespace Schwab.ClientNode
 
         static void Main(string[] args)
         {
-
-            var xxx = Environment.GetEnvironmentVariable("IsNebula");
-            
-            
             // Program argument - default values
             const long DEFAULT_NUM_CLIENTS = 1000;
             //const long DEFAULT_NUM_CLIENTS = 1_000_000;
@@ -245,17 +178,13 @@ namespace Schwab.ClientNode
             IgniteConfiguration cfg = ClientUtils.GetClientConfig();
             using (IIgnite ignite = Ignition.Start(cfg))
             {
-                
+
                 //Console.Write("Initialize and populate caches: Y/N [N]");
                 // string ok = Console.ReadLine().Trim().ToLower();
                 //  bool populateCaches = ok.Length > 0 && ok[0] == 'y';
 
-                
-                Console.ResetColor();
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("INITIALIZED");
-                Console.ResetColor();
-                
+
+
                 bool populateCaches = true;
                 if (populateCaches)
                 {
@@ -276,16 +205,25 @@ namespace Schwab.ClientNode
                     var jobCount = nodeCount * numProcessorsPerDataNode;
 
                     // Calculate the number and size of batches needed to distribute and populate clients in the compute grid.
-                    var batchCount = numClients / jobCount + 1;
-                    var batchSize = numClients / batchCount;
+                    // var batchCount = numClients / jobCount + 1;
+                    // var batchSize = numClients / batchCount;
+
+                    var batchCount = 1;
+                    var batchSize = 1;
 
 
                     // ***********   Populate and test Client records using the compute grid  ******************************
+
+                    PrintRed("Starting");
+
 
                     Console.WriteLine("Begin CLIENT generation using cache {0}: {1}", clientCache.Name,
                         DateTime.Now.ToString("h:mm:ss tt"));
 
                     var actions = BuildClientActionsUsing(numClients, clientCache.Name, batchCount, batchSize);
+
+                    PrintRed(actions.Count);
+
                     ignite.GetCluster().ForDataNodes(clientCache.Name).GetCompute().Run(actions);
 
                     Console.WriteLine("Begin CLIENT testing using cache {0}: {1}", clientCache.Name,
@@ -300,6 +238,8 @@ namespace Schwab.ClientNode
 
                     actions = BuildAccountActions(numClients, accountCache.Name, numAccountsPerClient, batchCount,
                         batchSize);
+
+                    PrintRed(actions.Count);
 
                     Console.WriteLine("Begin ACCOUNT generation using cache {0}: {1}", accountCache.Name,
                         DateTime.Now.ToString("h:mm:ss tt"));
@@ -321,27 +261,37 @@ namespace Schwab.ClientNode
                     ">>> Demonstrate .Net/C# compute tasks invoking Java compute tasks on any/all GridGain cluster server node(s).");
                 Console.WriteLine();
 
-                for (int id = minTestClientId; id <= maxTestClientId; id++)
+                Hashtable clientSums = SumBalancesForAllClients(ignite);
+
+                foreach (DictionaryEntry entry in clientSums)
                 {
-                    Decimal aggrBalance = (Decimal)ignite.GetCompute().Call(new FuncSumBalancesForClient(id));
-                    Console.WriteLine("Aggregate balance for client {0}: {1:C}", id, aggrBalance);
+                    Console.WriteLine($"Client {entry.Key} has balance {entry.Value}");
                 }
 
                 Console.WriteLine();
                 Console.WriteLine(">>> Find all clients with an aggregate account balance less than: {0:C} {1}",
                     aggrBalanceLimit, DateTime.Now.ToString("h:mm:ss tt"));
 
-                var nodeHits = ignite.GetCluster().ForDataNodes(Client.CACHE_NAME).GetCompute()
-                    .Broadcast<List<AggregateBalance>>(
-                        new FuncFindClientsWithAggregateBalanceLessThan(aggrBalanceLimit));
+                try
+                {
+                    var nodeHits = ignite.GetCluster().ForDataNodes(Client.CACHE_NAME).GetCompute()
+                        .Broadcast<List<AggregateBalance>>(
+                            new FuncFindClientsWithAggregateBalanceLessThan(aggrBalanceLimit));
 
-                var hits = nodeHits.SelectMany(list => list).ToList();
-                Console.WriteLine(String.Format("{0} Clients found: {1}", hits.Count,
-                    DateTime.Now.ToString("h:mm:ss tt")));
-                foreach (var hit in hits) Console.WriteLine(hit);
-                Console.WriteLine(String.Format("{0} Clients found: {1}", hits.Count,
-                    DateTime.Now.ToString("h:mm:ss tt")));
-                Console.WriteLine();
+
+                    var hits = nodeHits.SelectMany(list => list).ToList();
+                    Console.WriteLine(String.Format("{0} Clients found: {1}", hits.Count,
+                        DateTime.Now.ToString("h:mm:ss tt")));
+                    foreach (var hit in hits) Console.WriteLine(hit);
+                    Console.WriteLine(String.Format("{0} Clients found: {1}", hits.Count,
+                        DateTime.Now.ToString("h:mm:ss tt")));
+                    Console.WriteLine();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                }
+                
 
                 // ***********   End ClientNode actions  ******************************
 
@@ -349,6 +299,21 @@ namespace Schwab.ClientNode
                 Console.WriteLine(">>> ClientNode actions completed, press any key to exit ...");
 
             }
+        }
+        
+        static void UnhandledExceptionTrapper(object sender, UnhandledExceptionEventArgs e) {
+            Console.WriteLine(e.ExceptionObject.ToString());
+            Console.WriteLine("Press Enter to continue");
+            Console.ReadLine();
+            Environment.Exit(1);
+        }
+
+        private static void PrintRed(object message)
+        {
+            Console.ResetColor();
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine(message);
+            Console.ResetColor();
         }
     }
 }

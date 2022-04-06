@@ -20,7 +20,8 @@ namespace Shwab.Compute
 
         public Decimal Invoke()
         {
-            Console.WriteLine("UUUUUUU");
+            Console.WriteLine("!!!");
+            Console.WriteLine("FuncSumBalancesForClient");
             
             Decimal aggrBalance = (Decimal)_ignite.GetCompute().ExecuteJavaTask<Decimal>("com.gridgain.ignite.ggnode.cgrid.SumBalancesForClientTaskAffinity", clientId);
             _ignite.Logger.Log(LogLevel.Info, string.Format("{0} [id={1}, aggrBalance={2}]", typeof(FuncSumBalancesForClient).Name, clientId, aggrBalance.ToString()));

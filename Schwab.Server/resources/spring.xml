@@ -71,8 +71,8 @@
             </bean>
         </property>
 
-<!--        <property name="failureDetectionTimeout" value="333000"/>-->
-<!--        <property name="clientFailureDetectionTimeout" value="333000"/>-->
+        <property name="failureDetectionTimeout" value="333000"/>
+        <property name="clientFailureDetectionTimeout" value="333000"/>
 
         <!--
             Since the example is started on a single physical machine we need to configure specific TCP communication

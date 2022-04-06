@@ -27,7 +27,7 @@ namespace Schwab.ClientNode
             var config = GetLocalClientConfiguration();
 
             config.SpringConfigUrl = SchwabDemoSpringConfigUrl;
-            config.BinaryConfiguration = null;
+            //config.BinaryConfiguration = null;
             config.JavaPeerClassLoadingEnabled = false;
 
             config.PluginConfigurations = new IPluginConfiguration[] {
@@ -42,6 +42,7 @@ namespace Schwab.ClientNode
                 },
             };
 
+            
             return config;
         }
 
@@ -51,7 +52,9 @@ namespace Schwab.ClientNode
             return new IgniteConfiguration(Utils.GetServerNodeConfiguration())
             {
                 ClientMode = true,
-                BinaryConfiguration = new BinaryConfiguration(typeof(FuncSumBalancesForClient)),
+                //BinaryConfiguration = new BinaryConfiguration(typeof(FuncSumBalancesForClient)),
+                JavaPeerClassLoadingEnabled = false,
+                //JvmClasspath = null,
             };
         }
         

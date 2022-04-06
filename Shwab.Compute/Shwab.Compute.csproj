@@ -2,14 +2,12 @@
 
     <PropertyGroup>
         <TargetFramework>netcoreapp2.1</TargetFramework>
+<!--        <TargetFramework>net6.0</TargetFramework>-->
         <Deterministic>false</Deterministic>
         <AssemblyVersion>1.0.*</AssemblyVersion>
     </PropertyGroup>
 
-    <PropertyGroup>
-        <TargetFramework>netcoreapp2.1</TargetFramework>
-    </PropertyGroup>
-
+   
     <ItemGroup>
       <PackageReference Include="GridGain.Ignite" Version="8.8.14" />
     </ItemGroup>

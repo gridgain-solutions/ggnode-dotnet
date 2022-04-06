@@ -113,6 +113,8 @@ namespace Schwab.Shared
             {
                 // JvmOptions = new[]
                 // {
+                //     "-Xms1G",
+                //     "-Xmx1G",
                 //     "-Djava.net.preferIPv4Stack=true",
                 //     "-DIGNITE_QUIET=false",
                 //     "-DIGNITE_PERFORMANCE_SUGGESTIONS_DISABLED=true",
@@ -125,7 +127,7 @@ namespace Schwab.Shared
                 //     "--illegal-access="
                 // },
                 PeerAssemblyLoadingMode = PeerAssemblyLoadingMode.CurrentAppDomain,
-                JavaPeerClassLoadingEnabled = true,
+                JavaPeerClassLoadingEnabled = false,
                 SpringConfigUrl = SchwabDemoSpringConfigUrl,
                 JvmClasspath = GetUserClassPath(),
                 //BinaryConfiguration = new BinaryConfiguration(typeof(FuncSumBalancesForClient))
