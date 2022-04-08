@@ -8,8 +8,10 @@ using System.Globalization;
 using Schwab.Shared.Model;
 using Apache.Ignite.Core.Cache;
 using Apache.Ignite.Core.Cache.Query;
+using GridGain.Core.DataCenterReplication;
 using Shwab.Compute;
 using System.Collections;
+using System.Diagnostics;
 
 
 namespace Schwab.ClientNode
@@ -71,12 +73,12 @@ namespace Schwab.ClientNode
             return actions;
         }
         
-        static Hashtable SumBalancesForAllClients(IIgnite ignite)
+        static Hashtable SumBalancesForAllClients(IIgnite ignite, Decimal threshold)
         {
             //Hashtable obj = ignite.GetCluster().ForDataNodes(Account.CACHE_NAME).GetCompute()
             Hashtable obj = ignite.GetCluster().ForServers().GetCompute()
                 .ExecuteJavaTask<Hashtable>(
-                    "com.gridgain.ignite.ggnode.cgrid.SumBalancesForAllClientsTask", null);
+                    "com.gridgain.ignite.ggnode.cgrid.SumBalancesForAllClientsTask", threshold);
 
             return obj;
         }
@@ -261,8 +263,14 @@ namespace Schwab.ClientNode
                     ">>> Demonstrate .Net/C# compute tasks invoking Java compute tasks on any/all GridGain cluster server node(s).");
                 Console.WriteLine();
 
-                Hashtable clientSums = SumBalancesForAllClients(ignite);
-
+                Stopwatch sw = new Stopwatch();
+                sw.Start();
+                Hashtable clientSums = SumBalancesForAllClients(ignite, new decimal(250_000_000));
+                sw.Stop();
+                
+                Console.WriteLine("Found clients: " + clientSums.Count);
+                Console.WriteLine("sw.Elapsed :" + sw.Elapsed);
+                
                 foreach (DictionaryEntry entry in clientSums)
                 {
                     Console.WriteLine($"Client {entry.Key} has balance {entry.Value}");

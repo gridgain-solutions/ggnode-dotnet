@@ -16,6 +16,7 @@
  */
 
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace Schwab.Shared
 {
@@ -83,7 +84,11 @@ namespace Schwab.Shared
             }
             
             var result = Directory.GetFiles(currentPath.GetDirectories(target).Single().FullName, "*.jar", SearchOption.AllDirectories);
-            string classPath =  String.Join(":", result);
+
+            string del;
+            del = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ";" : ":";
+            
+            string classPath =  String.Join(del, result);
             
 
             //return classPath + ":";
