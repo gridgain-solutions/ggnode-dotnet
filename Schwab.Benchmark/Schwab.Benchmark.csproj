@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>netcoreapp2.1</TargetFramework>
+        <AssemblyName>Schwab.Benchmark</AssemblyName>
+        <RootNamespace>Schwab.Benchmark</RootNamespace>
+    </PropertyGroup>
+    
+    <ItemGroup>
+        <PackageReference Include="BenchmarkDotNet" Version="0.13.1" />
+        <ProjectReference Include="..\Schwab.Shared\Schwab.Shared.csproj"/>
+    </ItemGroup>
+
+</Project>
