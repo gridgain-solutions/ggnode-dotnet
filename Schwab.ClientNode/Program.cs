@@ -137,10 +137,10 @@ namespace Schwab.ClientNode
         static void Main(string[] args)
         {
             // Program argument - default values
-            const long DEFAULT_NUM_CLIENTS = 1000;
+            const long DEFAULT_NUM_CLIENTS = 10000;
             //const long DEFAULT_NUM_CLIENTS = 1_000_000;
             const long DEFAULT_NUM_ACCOUNTS_PER_CLIENT = 10_000; // 10_000;
-            const decimal DEFAULT_AGGR_BALANCE_LIMIT = 75000M;
+            const decimal DEFAULT_AGGR_BALANCE_LIMIT = 250_000_000M;
             const int DEFAULT_NUM_PROCESSORS_PER_DATA_NODE = 3; // 8;
 
             const int DEFAULT_MIN_TEST_CLIENT_ID = 1;
@@ -325,12 +325,12 @@ namespace Schwab.ClientNode
         {
             Hashtable jobRes = SumBalancesForAllClients(null, ignite);
 
-            var res = new Dictionary<AccountKey, decimal>(); 
+            var res = new Dictionary<long, decimal>(); 
             foreach (DictionaryEntry e in jobRes)
             {
                 if ((decimal) e.Value < threshold)
                 {
-                    res.Add((AccountKey)e.Key, (decimal)e.Value);
+                    res.Add((long)e.Key, (decimal)e.Value);
                 }
             }
             
