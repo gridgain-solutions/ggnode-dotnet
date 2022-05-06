@@ -19,6 +19,12 @@ namespace Schwab.Server
             using (var ignite = Ignition.Start(igniteConfig = Utils.GetServerNodeConfiguration()))
             {
                 
+                while(ignite.GetCluster().TopologyVersion < 2)
+                {
+                    Thread.Sleep(100);
+                }
+                ignite.GetCluster().SetActive(true);
+                
                 Console.WriteLine(ignite.GetConfiguration().JvmClasspath);
                 
                 Utils.DeployDefaultServices(ignite);

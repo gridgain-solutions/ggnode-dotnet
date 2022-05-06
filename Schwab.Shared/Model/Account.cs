@@ -1,4 +1,6 @@
-﻿namespace Schwab.Shared.Model
+﻿using Apache.Ignite.Core.Binary;
+
+namespace Schwab.Shared.Model
 {
     using System;
     using System.Collections.Generic;
@@ -8,7 +10,7 @@
     using Apache.Ignite.Core.Cache.Configuration;
 
 
-    public class AccountKey
+    public class AccountKey : IBinarizable
     {
         [QuerySqlField]
         public long Id { get; set; }
@@ -16,10 +18,24 @@
         [QuerySqlField]
         [AffinityKeyMapped]
         public long ClientId { get; set; }
+
+        public void WriteBinary(IBinaryWriter writer)
+        {
+            var rawWriter = writer.GetRawWriter();
+            rawWriter.WriteLong(this.Id);
+            rawWriter.WriteLong(this.ClientId);
+        }
+
+        public void ReadBinary(IBinaryReader reader)
+        {
+            var rawReader = reader.GetRawReader();
+            Id = rawReader.ReadLong();
+            ClientId = rawReader.ReadLong();
+        }
     }
 
 
-    public class Account
+    public class Account :IBinarizable
     {
         public static string SQL_SCHEMA = "SDEMO";
         public static string CACHE_NAME = "ACCOUNT_CACHE";
@@ -67,6 +83,22 @@
                 : string.Empty;
 
             return string.Format("[{0}]", elements);
+        }
+
+        public void WriteBinary(IBinaryWriter writer)
+        {
+            var rawWriter = writer.GetRawWriter();
+            rawWriter.WriteString( Name);
+            rawWriter.WriteInt(Type);
+            rawWriter.WriteDecimal( Balance);
+        }
+
+        public void ReadBinary(IBinaryReader reader)
+        {
+            var rawReader = reader.GetRawReader();
+            Name = rawReader.ReadString();
+            Type = rawReader.ReadInt();
+            Balance = rawReader.ReadDecimal().GetValueOrDefault();
         }
     }
 }

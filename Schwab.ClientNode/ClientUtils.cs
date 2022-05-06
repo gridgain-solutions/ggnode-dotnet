@@ -4,6 +4,7 @@ using Apache.Ignite.Core.Plugin;
 using GridGain.Core;
 using GridGain.Core.Security;
 using Schwab.Shared;
+using Schwab.Shared.Model;
 using Shwab.Compute;
 using System;
 
@@ -52,7 +53,7 @@ namespace Schwab.ClientNode
             return new IgniteConfiguration(Utils.GetServerNodeConfiguration())
             {
                 ClientMode = true,
-                //BinaryConfiguration = new BinaryConfiguration(typeof(FuncSumBalancesForClient)),
+                //BinaryConfiguration = new BinaryConfiguration(typeof(Account), typeof(AccountKey)),
                 JavaPeerClassLoadingEnabled = false,
                 //JvmClasspath = null,
             };

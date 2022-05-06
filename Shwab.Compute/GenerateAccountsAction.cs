@@ -27,27 +27,36 @@ namespace Shwab.Compute
         public void Invoke()
         {
             Console.WriteLine("!!!");
-            Console.WriteLine("GenerateAccountsAction");
+            Console.WriteLine("GenerateAccountsAction2");
             Random random = new Random();
 
-            using (var streamer = _ignite.GetDataStreamer<AccountKey, Account>(_accountCacheName))
+            try
             {
-                streamer.AllowOverwrite = true;
-                long maxClientId = _clientFirstKey + _clientKeyCount;
-                for (long clientId = _clientFirstKey; clientId < maxClientId; clientId++)
+                _ignite.GetCluster().DisableWal(_accountCacheName);
+
+                using (var streamer = _ignite.GetDataStreamer<AccountKey, Account>(_accountCacheName))
                 {
-                    for (long accountNum = 0; accountNum < _numAccountsPerClient; accountNum++)
+                    streamer.AllowOverwrite = true;
+                    long maxClientId = _clientFirstKey + _clientKeyCount;
+                    for (long clientId = _clientFirstKey; clientId < maxClientId; clientId++)
                     {
-                        var accountId = clientId * _numAccountsPerClient + accountNum;
-                        var accountName = string.Format("C{0}.A{1}", clientId, accountNum);
-                        var accountBal = new Decimal(random.Next(0, 50_000));
+                        for (long accountNum = 0; accountNum < _numAccountsPerClient; accountNum++)
+                        {
+                            var accountId = clientId * _numAccountsPerClient + accountNum;
+                            var accountName = string.Format("C{0}.A{1}", clientId, accountNum);
+                            var accountBal = new Decimal(random.Next(0, 50_000));
 
-                        var accountKey = new AccountKey {Id = accountId, ClientId = clientId};
-                        var account = new Account {Name = accountName, Type = 0, Balance = accountBal};
+                            var accountKey = new AccountKey {Id = accountId, ClientId = clientId};
+                            var account = new Account {Name = accountName, Type = 0, Balance = accountBal};
 
-                        streamer.Add(accountKey, account);
+                            streamer.Add(accountKey, account);
+                        }
                     }
                 }
+            }
+            finally
+            {
+                _ignite.GetCluster().EnableWal(_accountCacheName);
             }
         }
     }

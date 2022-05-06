@@ -17,6 +17,7 @@
 
 using System.Linq;
 using System.Runtime.InteropServices;
+using Apache.Ignite.Core.Configuration;
 
 namespace Schwab.Shared
 {
@@ -142,7 +143,25 @@ namespace Schwab.Shared
                 JavaPeerClassLoadingEnabled = false,
                 SpringConfigUrl = SchwabDemoSpringConfigUrl,
                 JvmClasspath = GetUserClassPath(),
-                //BinaryConfiguration = new BinaryConfiguration(typeof(FuncSumBalancesForClient))
+                DataStorageConfiguration = new DataStorageConfiguration
+                {
+                    DefaultDataRegionConfiguration = new DataRegionConfiguration
+                    {
+                        Name = DataStorageConfiguration.DefaultDataRegionName,
+                        PersistenceEnabled = true,
+                        MaxSize = 2_000_000_000,
+                        
+                    }
+                },
+                
+                
+                
+                
+
+                BinaryConfiguration = new BinaryConfiguration(typeof(Account), typeof(AccountKey), typeof(Client))
+                {
+                    NameMapper = new BinaryBasicNameMapper(){ IsSimpleName = true}
+                }
             };
             Console.WriteLine(cfg.JvmClasspath);
 

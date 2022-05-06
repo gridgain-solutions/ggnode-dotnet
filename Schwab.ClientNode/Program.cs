@@ -75,7 +75,7 @@ namespace Schwab.ClientNode
         {
             return ignite.GetCluster().ForServers().GetCompute()
                 .ExecuteJavaTask<Hashtable>(
-                    "com.gridgain.ignite.ggnode.cgrid.SumBalancesForAllClientsTask", threshold);
+                    "com.gridgain.ignite.ggnode.cgrid.SumBalancesForAllClientsTask3", threshold);
         }
 
         static void TestClientsUsing(ICache<long, Client> cache, int modulus)
@@ -137,7 +137,7 @@ namespace Schwab.ClientNode
         static void Main(string[] args)
         {
             // Program argument - default values
-            const long DEFAULT_NUM_CLIENTS = 10000;
+            const long DEFAULT_NUM_CLIENTS = 2_000;
             //const long DEFAULT_NUM_CLIENTS = 1_000_000;
             const long DEFAULT_NUM_ACCOUNTS_PER_CLIENT = 10_000; // 10_000;
             const decimal DEFAULT_AGGR_BALANCE_LIMIT = 250_000_000M;
@@ -180,17 +180,42 @@ namespace Schwab.ClientNode
                 //  bool populateCaches = ok.Length > 0 && ok[0] == 'y';
 
 
-                bool populateCaches = true;
+                bool populateCaches = false;
                 if (populateCaches)
                 {
                     PopulateCaches(ignite, numProcessorsPerDataNode, numClients, numAccountsPerClient);
                 }
-
+                
+                Console.WriteLine("!!!!!");
+                //
+                // ignite.GetOrCreateCache<AccountKey, Account>(Account.CACHE_NAME).Get(new AccountKey {
+                //     Id = 100,
+                //     ClientId = 100
+                // });
+                
+                //warmup
+                // ignite.GetCluster().ForServers().GetCompute()
+                //     .ExecuteJavaTask<Hashtable>(
+                //         "com.gridgain.ignite.ggnode.cgrid.SumBalancesForAllClientsTask2", (decimal?)10000);
+                //
+                
                 Console.WriteLine();
                 Console.WriteLine(">>> Example: .Net-C#/Java Compute Tasks");
                 Console.WriteLine(
                     ">>> Demonstrate .Net/C# compute tasks invoking Java compute tasks on any/all GridGain cluster server node(s).");
                 Console.WriteLine();
+                
+                {
+                     Console.WriteLine(">>> Example0: all computations on .NET side");
+                     Stopwatch sw = new Stopwatch();
+                     sw.Start();
+                     var xxxx  = ignite.GetCluster().ForServers().GetCompute()
+                         .Execute(new AggregateTask(), null);
+                     
+                     Console.WriteLine($"Found total clients: {xxxx.Count}");
+                     
+                     Console.WriteLine($"$>>> Example0 took {sw.Elapsed}");
+                 }
                 
                 {
                     Console.WriteLine(">>> Example1: all computations on java side");
@@ -208,21 +233,21 @@ namespace Schwab.ClientNode
                     Console.WriteLine($"$>>> Example2 took {sw.Elapsed}");
                 }
                 
-                {
-                    Console.WriteLine(">>> Example3: using small java jobs, reducing and filtering on .net");
-                    Stopwatch sw = new Stopwatch();
-                    sw.Start();
-                    FindAllClientsWithAggregateBalanceUsingSql(aggrBalanceLimit, ignite);
-                    Console.WriteLine($"$>>> Example3 took {sw.Elapsed}");
-                }
-                
-                {
-                    Console.WriteLine(">>> Example4: using small java jobs, reducing and filtering on .net");
-                    Stopwatch sw = new Stopwatch();
-                    sw.Start();
-                    FindAllClientsWithAggregateBalanceUsingSmallJobs(aggrBalanceLimit, ignite);
-                    Console.WriteLine($"$>>> Example4 took {sw.Elapsed}");
-                }
+                // {
+                //     Console.WriteLine(">>> Example3: using small java jobs, reducing and filtering on .net");
+                //     Stopwatch sw = new Stopwatch();
+                //     sw.Start();
+                //     FindAllClientsWithAggregateBalanceUsingSql(aggrBalanceLimit, ignite);
+                //     Console.WriteLine($"$>>> Example3 took {sw.Elapsed}");
+                // }
+                //
+                // {
+                //     Console.WriteLine(">>> Example4: using small java jobs, reducing and filtering on .net");
+                //     Stopwatch sw = new Stopwatch();
+                //     sw.Start();
+                //     FindAllClientsWithAggregateBalanceUsingSmallJobs(aggrBalanceLimit, ignite);
+                //     Console.WriteLine($"$>>> Example4 took {sw.Elapsed}");
+                // }
 
                 Console.WriteLine();
                 Console.WriteLine(">>> ClientNode actions completed, press any key to exit ...");
@@ -273,7 +298,7 @@ namespace Schwab.ClientNode
             Console.WriteLine("Begin CLIENT testing using cache {0}: {1}", clientCache.Name,
                 DateTime.Now.ToString("h:mm:ss tt"));
 
-            TestClientsUsing(clientCache, 1000);
+            //TestClientsUsing(clientCache, 1000);
 
             Console.WriteLine("End CLIENT generation/test: {0}", DateTime.Now.ToString("h:mm:ss tt"));
 
@@ -349,9 +374,9 @@ namespace Schwab.ClientNode
                 var hits = nodeHits.SelectMany(list => list).ToList();
                 Console.WriteLine(String.Format("{0} Clients found: {1}", hits.Count,
                     DateTime.Now.ToString("h:mm:ss tt")));
-                foreach (var hit in hits) Console.WriteLine(hit);
-                Console.WriteLine(String.Format("{0} Clients found: {1}", hits.Count,
-                    DateTime.Now.ToString("h:mm:ss tt")));
+                // foreach (var hit in hits) Console.WriteLine(hit);
+                // Console.WriteLine(String.Format("{0} Clients found: {1}", hits.Count,
+                //     DateTime.Now.ToString("h:mm:ss tt")));
                 Console.WriteLine();
             }
             catch (Exception ex)

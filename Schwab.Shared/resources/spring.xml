@@ -59,8 +59,12 @@
                         <property name="addresses">
                             <list>
                                 <!-- IP address and port ranges of nodes from this data center. -->
-                                <value>3.15.31.57:47500</value>
+                                <value>3.133.109.104:47500</value>
                                 <value>18.117.158.67:47500</value>
+                                <value>3.144.18.149:47500</value>
+                                <value>3.135.193.70:47500</value>
+                                <value>3.137.212.68:47500</value>
+                                <value>3.15.31.57:47500</value>
 <!--                                <value>5558dc15-f0a7-4593-a1fa-65e0a7dcf853.gridgain-nebula.com:47500</value>-->
                             </list>
                         </property>
