@@ -4,7 +4,7 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
 <!--    <TargetFramework>net6.0</TargetFramework>-->
 	<Deterministic>false</Deterministic>
-    <AssemblyVersion>1.0.*</AssemblyVersion>
+    <AssemblyVersion>1.0.8131.35822</AssemblyVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">

@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using Schwab.Shared.Model;
 using Apache.Ignite.Core.Cache;
+using Apache.Ignite.Core.Cache.Configuration;
 using Apache.Ignite.Core.Cache.Query;
 using Shwab.Compute;
 using System.Collections;
@@ -180,7 +181,7 @@ namespace Schwab.ClientNode
                 //  bool populateCaches = ok.Length > 0 && ok[0] == 'y';
 
 
-                bool populateCaches = true;
+                bool populateCaches = false;
                 if (populateCaches)
                 {
                     PopulateCaches(ignite, numProcessorsPerDataNode, numClients, numAccountsPerClient);
@@ -192,37 +193,45 @@ namespace Schwab.ClientNode
                     ">>> Demonstrate .Net/C# compute tasks invoking Java compute tasks on any/all GridGain cluster server node(s).");
                 Console.WriteLine();
                 
+                // this is for initial TCP communication which is slow for some reason on .NET cluster 
+                // deployed manually
+                PrintRed("Warmup");
+                
+            
+                FindAllClientsWithAggregateBalanceFilterOnJavaSide(aggrBalanceLimit, ignite);
+
+                
                 {
-                    Console.WriteLine(">>> Example1: all computations on java side");
+                    PrintRed(">>> Example1: all computations on java side");
                     Stopwatch sw = new Stopwatch();
                     sw.Start();
                     FindAllClientsWithAggregateBalanceFilterOnJavaSide(aggrBalanceLimit, ignite);
-                    Console.WriteLine($"$>>> Example1 took {sw.Elapsed}");
+                    PrintRed($"$>>> Example1 took {sw.Elapsed}");
                 }
                 
-                {
-                    Console.WriteLine(">>> Example2: most computations on java side, filter on .net side");
-                    Stopwatch sw = new Stopwatch();
-                    sw.Start();
-                    FindAllClientsWithAggregateBalanceFilterOnNetSide(aggrBalanceLimit, ignite);
-                    Console.WriteLine($"$>>> Example2 took {sw.Elapsed}");
-                }
+                // {
+                //     PrintRed(">>> Example2: most computations on java side, filter on .net side");
+                //     Stopwatch sw = new Stopwatch();
+                //     sw.Start();
+                //     FindAllClientsWithAggregateBalanceFilterOnNetSide(aggrBalanceLimit, ignite);
+                //     PrintRed($"$>>> Example2 took {sw.Elapsed}");
+                // }
                 
-                {
-                    Console.WriteLine(">>> Example3: using small java jobs, reducing and filtering on .net");
-                    Stopwatch sw = new Stopwatch();
-                    sw.Start();
-                    FindAllClientsWithAggregateBalanceUsingSql(aggrBalanceLimit, ignite);
-                    Console.WriteLine($"$>>> Example3 took {sw.Elapsed}");
-                }
-                
-                {
-                    Console.WriteLine(">>> Example4: using small java jobs, reducing and filtering on .net");
-                    Stopwatch sw = new Stopwatch();
-                    sw.Start();
-                    FindAllClientsWithAggregateBalanceUsingSmallJobs(aggrBalanceLimit, ignite);
-                    Console.WriteLine($"$>>> Example4 took {sw.Elapsed}");
-                }
+                // {
+                //     Console.WriteLine(">>> Example3: using small java jobs, reducing and filtering on .net");
+                //     Stopwatch sw = new Stopwatch();
+                //     sw.Start();
+                //     FindAllClientsWithAggregateBalanceUsingSql(aggrBalanceLimit, ignite);
+                //     Console.WriteLine($"$>>> Example3 took {sw.Elapsed}");
+                // }
+                //
+                // {
+                //     Console.WriteLine(">>> Example4: using small java jobs, reducing and filtering on .net");
+                //     Stopwatch sw = new Stopwatch();
+                //     sw.Start();
+                //     FindAllClientsWithAggregateBalanceUsingSmallJobs(aggrBalanceLimit, ignite);
+                //     Console.WriteLine($"$>>> Example4 took {sw.Elapsed}");
+                // }
 
                 Console.WriteLine();
                 Console.WriteLine(">>> ClientNode actions completed, press any key to exit ...");
@@ -257,9 +266,14 @@ namespace Schwab.ClientNode
 
 
             // ***********   Populate and test Client records using the compute grid  ******************************
+            
+            PrintRed("Warmup");
+            
+            var wamup = BuildClientActionsUsing(numClients, clientCache.Name, batchCount, batchSize);
+            ignite.GetCluster().ForDataNodes(clientCache.Name).GetCompute().Run(wamup);
+
 
             PrintRed("Starting");
-
 
             Console.WriteLine("Begin CLIENT generation using cache {0}: {1}", clientCache.Name,
                 DateTime.Now.ToString("h:mm:ss tt"));
